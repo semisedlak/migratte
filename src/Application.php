@@ -1,0 +1,44 @@
+<?php
+
+namespace Semisedlak\Migratte;
+
+use ReflectionClass;
+use Semisedlak\Migratte\Commands;
+use Semisedlak\Migratte\Migrations\Config;
+use Symfony\Component\Console\Application as ConsoleApplication;
+
+class Application
+{
+	public const NAME = 'Migratte';
+	public const VERSION = '0.1.0';
+
+	public static function boot(array $options = [], array $commandClasses = []): ConsoleApplication
+	{
+		$application = new ConsoleApplication(self::NAME, self::VERSION);
+
+		$config = new Config($options);
+		$kernel = new Kernel($config);
+
+		if (empty($commandClasses)) {
+			$commandClasses = [
+				Commands\GenerateCommand::class,
+				Commands\CommitCommand::class,
+				Commands\RollbackCommand::class,
+				Commands\StatusCommand::class,
+			];
+		}
+
+		foreach ($commandClasses as $commandClass) {
+			$reflection = new ReflectionClass($commandClass);
+			if (!$reflection->getParentClass() || $reflection->getParentClass()->getName() != Commands\Command::class) {
+				echo 'Class "' . $commandClass . '" is not child class of "' . Commands\Command::class . '"' . PHP_EOL;
+				echo 'Please, remove this command...' . PHP_EOL;
+				exit(1);
+			}
+
+			$application->add(new $commandClass($kernel));
+		}
+
+		return $application;
+	}
+}
