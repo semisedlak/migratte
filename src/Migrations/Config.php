@@ -33,14 +33,14 @@ class Config
 
 		date_default_timezone_set($this->options['timezone']);
 
-		$this->connection = new Connection($this->options['connection']);
-		$this->timeZone = new DateTimeZone(date_default_timezone_get());
-
 		$dir = $this->options['migrationsDir'];
 		if (!is_dir($dir)) {
 			mkdir($dir, 0777, TRUE);
 		}
 		$this->options['migrationsDir'] = realpath($dir);
+
+		$this->timeZone = new DateTimeZone(date_default_timezone_get());
+		$this->connection = new Connection($this->options['connection']);
 	}
 
 	public function getConnection(): Connection
