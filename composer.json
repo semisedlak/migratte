@@ -10,8 +10,7 @@
 	],
 	"require": {
 		"dibi/dibi": "^4",
-		"symfony/console": "^4",
-		"nette/neon": "^3"
+		"symfony/console": "^4"
 	},
 	"autoload": {
 		"psr-4": {
