@@ -3,8 +3,12 @@
 namespace Semisedlak\Migratte\Migrations;
 
 use DateTimeImmutable;
+use Dibi\DateTime;
+use Dibi\Drivers\MySqliDriver;
+use Dibi\Drivers\Sqlite3Driver;
 use Dibi\Drivers\SqliteDriver;
 use Dibi\Row;
+use Nette\Database\Drivers\MySqlDriver;
 
 class Kernel
 {
@@ -20,19 +24,28 @@ class Kernel
 	private function prepare(): void
 	{
 		$connection = $this->config->getConnection();
+		$driver = $connection->getDriver();
 		$table = $this->config->getTable();
 
 		$tableName = $table->getName();
 
 		$sql = '-- noop';
-		if ($connection->getDriver() instanceof SqliteDriver) {
+		if ($driver instanceof SqliteDriver || $driver instanceof Sqlite3Driver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS "$tableName"
 (
-    "{$table->primaryKey}" INTEGER PRIMARY KEY AUTOINCREMENT, 
-    "{$table->fileName}" TEXT, 
-    "{$table->committedAt}" DATETIME DEFAULT NULL
+	"{$table->primaryKey}" INTEGER PRIMARY KEY AUTOINCREMENT, 
+	"{$table->fileName}" TEXT, 
+	"{$table->committedAt}" DATETIME DEFAULT NULL
 )
+SQL;
+		} elseif ($driver instanceof MySqlDriver || $driver instanceof MySqliDriver) {
+			$sql = <<<SQL
+CREATE TABLE `$tableName` (
+	`{$table->primaryKey}` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `{$table->fileName}` int NOT NULL,
+	`{$table->committedAt}` datetime NULL
+) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 SQL;
 		}
 
@@ -95,7 +108,12 @@ SQL;
 		$table = $this->config->getTable();
 		$row = $this->getMigration($fileName);
 		if ($row) {
-			$dateTime = DateTimeImmutable::createFromFormat('U', $row[$table->committedAt]);
+			$committedAtDate = $row[$table->committedAt];
+			if ($committedAtDate instanceof DateTime) {
+				$dateTime = $committedAtDate;
+			} else {
+				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate);
+			}
 			if ($dateTime) {
 				$dateTime->setTimezone($this->config->getTimeZone());
 			}
