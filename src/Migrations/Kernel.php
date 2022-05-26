@@ -20,14 +20,19 @@ class Kernel
 	private function prepare(): void
 	{
 		$connection = $this->config->getConnection();
+		$table = $this->config->getTable();
 
-		$tableName = $this->config->migrationsTable;
+		$tableName = $table->getName();
 
 		$sql = '-- noop';
 		if ($connection->getDriver() instanceof SqliteDriver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS "$tableName"
-("id" INTEGER PRIMARY KEY AUTOINCREMENT, "file" TEXT, "committed_at" DATETIME DEFAULT NULL, "is_breakpoint" BOOL)
+(
+    "{$table->primaryKey}" INTEGER PRIMARY KEY AUTOINCREMENT, 
+    "{$table->fileName}" TEXT, 
+    "{$table->committedAt}" DATETIME DEFAULT NULL
+)
 SQL;
 		}
 
@@ -75,10 +80,11 @@ SQL;
 	public function getLastMigration(): ?Row
 	{
 		$connection = $this->config->getConnection();
+		$table = $this->config->getTable();
 
 		$row = $connection->select('*')
-			->from('%n', $this->config->migrationsTable)
-			->orderBy('[id]', 'DESC')
+			->from('%n', $table->getName())
+			->orderBy('%n DESC', $table->primaryKey)
 			->fetch();
 
 		return $row ?: NULL;
@@ -86,10 +92,15 @@ SQL;
 
 	public function getCommittedAt(string $fileName): ?DateTimeImmutable
 	{
+		$table = $this->config->getTable();
 		$row = $this->getMigration($fileName);
 		if ($row) {
-			return DateTimeImmutable::createFromFormat('U', $row->committed_at)
-				->setTimezone($this->config->getTimeZone());
+			$dateTime = DateTimeImmutable::createFromFormat('U', $row[$table->committedAt]);
+			if ($dateTime) {
+				$dateTime->setTimezone($this->config->getTimeZone());
+			}
+
+			return $dateTime ?: NULL;
 		}
 
 		return NULL;
@@ -98,10 +109,11 @@ SQL;
 	public function getMigration(string $migrationFile): ?Row
 	{
 		$connection = $this->config->getConnection();
+		$table = $this->config->getTable();
 
 		$row = $connection->select('*')
-			->from('%n', $this->config->migrationsTable)
-			->where('[file] = %s', $migrationFile)
+			->from('%n', $table->getName())
+			->where('%n = %s', $table->fileName, $migrationFile)
 			->fetch();
 
 		return $row ?: NULL;

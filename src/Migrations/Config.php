@@ -7,13 +7,15 @@ use Dibi\Connection;
 
 /**
  * @property-read string $migrationsDir
- * @property-read string $migrationsTable
+ * @property-read string $timezone
  */
 class Config
 {
 	private Connection $connection;
 
 	private DateTimeZone $timeZone;
+
+	private Table $table;
 
 	private array $options;
 
@@ -23,7 +25,12 @@ class Config
 		$baseOptions = [
 			'timezone'        => 'UTC',
 			'migrationsDir'   => "$workingDir/database/migrations",
-			'migrationsTable' => 'migrations',
+			'migrationsTable' => [
+				'name'        => 'migrations',
+				'primaryKey'  => 'id',
+				'fileName'    => 'filename',
+				'committedAt' => 'committed_at',
+			],
 			'connection'      => [
 				'driver'   => 'sqlite',
 				'database' => "$workingDir/database/migratte.s3db",
@@ -31,6 +38,14 @@ class Config
 		];
 
 		$this->options = array_merge($baseOptions, $options);
+		$this->options['migrationsTable'] = array_merge($baseOptions['migrationsTable'], $options['migrationsTable'] ?? []);
+
+		$this->table = new Table(
+			$this->options['migrationsTable']['name'],
+			$this->options['migrationsTable']['primaryKey'],
+			$this->options['migrationsTable']['fileName'],
+			$this->options['migrationsTable']['committedAt']
+		);
 
 		date_default_timezone_set($this->options['timezone']);
 
@@ -52,6 +67,11 @@ class Config
 	public function getTimeZone(): DateTimeZone
 	{
 		return $this->timeZone;
+	}
+
+	public function getTable(): Table
+	{
+		return $this->table;
 	}
 
 	public function __get($name)

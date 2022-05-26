@@ -25,13 +25,14 @@ class RollbackCommand extends Command
 
 		$config = $this->kernel->getConfig();
 		$connection = $config->getConnection();
+		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 
 		$rollbackPerformed = FALSE;
 		$count = 0;
 		while ($lastMigration = $this->kernel->getLastMigration()) {
 			$rollbackPerformed = TRUE;
-			$migrationFile = $lastMigration->file;
+			$migrationFile = $lastMigration[$table->fileName];
 			$this->write('Migration "' . $migrationFile . '" rollback ... ');
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
 			require_once $config->migrationsDir . '/' . $migrationFile;
@@ -47,8 +48,8 @@ class RollbackCommand extends Command
 
 				$connection->nativeQuery($migration::down());
 
-				$connection->delete($config->migrationsTable)
-					->where('[id] = %i', $lastMigration->id)
+				$connection->delete($table->getName())
+					->where('%n = %i', $table->primaryKey, $lastMigration[$table->primaryKey])
 					->execute();
 
 				$connection->commit();

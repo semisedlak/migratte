@@ -26,6 +26,7 @@ class CommitCommand extends Command
 
 		$config = $this->kernel->getConfig();
 		$connection = $config->getConnection();
+		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 
 		$migrationFiles = $this->kernel->getMigrationFilesList();
@@ -49,10 +50,9 @@ class CommitCommand extends Command
 			try {
 				$connection->nativeQuery($migration::up());
 
-				$connection->insert($config->migrationsTable, [
-					'file'          => $migrationFile,
-					'committed_at'  => new DateTime(),
-					'is_breakpoint' => $migration::isBreakpoint(),
+				$connection->insert($table->getName(), [
+					$table->fileName    => $migrationFile,
+					$table->committedAt => new DateTime(),
 				])->execute();
 
 				$connection->commit();
