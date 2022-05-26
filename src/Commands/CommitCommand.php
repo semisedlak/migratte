@@ -45,8 +45,7 @@ class CommitCommand extends Command
 			/** @var Migration $migration */
 			$migration = new $className($this->kernel);
 
-			$transactionName = 'migratte';
-			$connection->begin($transactionName);
+			$connection->begin();
 			try {
 				$connection->nativeQuery($migration::up());
 
@@ -56,12 +55,12 @@ class CommitCommand extends Command
 					'is_breakpoint' => $migration::isBreakpoint(),
 				])->execute();
 
-				$connection->commit($transactionName);
+				$connection->commit();
 
 				$this->writelnSuccess(' DONE ');
 				$count++;
 			} catch (Exception $e) {
-				$connection->rollback($transactionName);
+				$connection->rollback();
 				$this->writelnError(' FAILURE ');
 				$this->writelnRed($e->getMessage());
 

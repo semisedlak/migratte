@@ -39,8 +39,7 @@ class RollbackCommand extends Command
 			/** @var Migration $migration */
 			$migration = new $className($this->kernel);
 
-			$transactionName = 'migratte';
-			$connection->begin($transactionName);
+			$connection->begin();
 			try {
 				if ($migration::isBreakpoint()) {
 					throw new Exception('Migration is breakpoint and thus rollback is unable');
@@ -52,12 +51,12 @@ class RollbackCommand extends Command
 					->where('[id] = %i', $lastMigration->id)
 					->execute();
 
-				$connection->commit($transactionName);
+				$connection->commit();
 
 				$this->writelnSuccess(' DONE ');
 				$count++;
 			} catch (Exception $e) {
-				$connection->rollback($transactionName);
+				$connection->rollback();
 				$this->writelnError(' FAILURE ');
 				$this->writelnRed($e->getMessage());
 
