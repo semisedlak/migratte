@@ -1,0 +1,21 @@
+{
+	"name": "semisedlak/migratte",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Milan Sedlák",
+			"email": "milan@semisedlak.com"
+		}
+	],
+	"require": {
+		"dibi/dibi": "^4",
+		"symfony/console": "^4",
+		"nette/neon": "^3"
+	},
+	"autoload": {
+		"psr-4": {
+			"Semisedlak\\Migratte\\": "src/"
+		}
+	}
+}
