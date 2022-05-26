@@ -19,13 +19,14 @@ class Config
 
 	public function __construct(array $options = [])
 	{
+		$workingDir = getcwd();
 		$baseOptions = [
 			'timezone'        => 'UTC',
-			'migrationsDir'   => __DIR__ . '/../../../database/migrations',
+			'migrationsDir'   => "$workingDir/database/migrations",
 			'migrationsTable' => 'migrations',
 			'connection'      => [
 				'driver'   => 'sqlite',
-				'database' => __DIR__ . '/../../../database/migratte.s3db',
+				'database' => "$workingDir/database/migratte.s3db",
 			],
 		];
 
