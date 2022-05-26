@@ -127,7 +127,8 @@ abstract class Command extends SymfonyCommand
 		$this->input = $input;
 		$this->output = $output;
 
-		$this->output->writeln('[ ' . Application::NAME . ' ' . Application::VERSION . ' ]');
+		$this->write(Application::NAME . ' ');
+		$this->writelnGreen(Application::VERSION . PHP_EOL);
 
 		return 0;
 	}
