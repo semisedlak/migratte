@@ -3,7 +3,6 @@
 namespace Semisedlak\Migratte\Migrations;
 
 use DateTimeImmutable;
-use Semisedlak\Migratte\Kernel;
 
 abstract class Migration
 {

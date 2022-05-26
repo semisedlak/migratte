@@ -1,10 +1,9 @@
 <?php
 
-namespace Semisedlak\Migratte;
+namespace Semisedlak\Migratte\Migrations;
 
 use ReflectionClass;
 use Semisedlak\Migratte\Commands;
-use Semisedlak\Migratte\Migrations\Config;
 use Symfony\Component\Console\Application as ConsoleApplication;
 
 class Application

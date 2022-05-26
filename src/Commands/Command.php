@@ -2,8 +2,8 @@
 
 namespace Semisedlak\Migratte\Commands;
 
-use Semisedlak\Migratte\Application;
-use Semisedlak\Migratte\Kernel;
+use Semisedlak\Migratte\Migrations\Application;
+use Semisedlak\Migratte\Migrations\Kernel;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

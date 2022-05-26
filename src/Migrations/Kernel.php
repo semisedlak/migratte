@@ -1,11 +1,10 @@
 <?php
 
-namespace Semisedlak\Migratte;
+namespace Semisedlak\Migratte\Migrations;
 
 use DateTimeImmutable;
 use Dibi\Drivers\SqliteDriver;
 use Dibi\Row;
-use Semisedlak\Migratte\Migrations\Config;
 
 class Kernel
 {
