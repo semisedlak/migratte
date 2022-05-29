@@ -60,11 +60,11 @@ class GenerateCommand extends Command
 		return $name;
 	}
 
-	private function getMigrationTemplate(string $name, DateTime $date)
+	private function getMigrationTemplate(string $name, DateTime $date): string
 	{
 		$nowClassName = $date->format('Ymd_His');
 
-		$contents = <<<PHP
+		return <<<PHP
 <?php
 
 use Semisedlak\Migratte\Migrations\Migration;
@@ -89,14 +89,12 @@ SQL;
 	 */
 }
 PHP;
-
-		return $contents;
 	}
 
 	private function prepareName(?string $name): ?string
 	{
 		if ($name) {
-			$name = trim(preg_replace('#[^a-z0-9]+#i', '-', strtolower($name)), '-');
+			$name = trim(preg_replace('#[^a-z\d]+#i', '-', strtolower($name)), '-');
 		}
 
 		return $name;

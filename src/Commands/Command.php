@@ -44,13 +44,23 @@ abstract class Command extends SymfonyCommand
 	{
 		if (substr($name, 0, 7) == 'writeln') {
 			$color = strtolower(substr($name, 7));
-			$text = isset($arguments[1]) ? $arguments[1] : '';
+			$text = $arguments[1] ?? '';
 			$this->writelnFormatted($arguments[0], $color, '', $text ?: PHP_EOL);
 		} elseif (substr($name, 0, 5) == 'write') {
 			$color = strtolower(substr($name, 5));
-			$text = isset($arguments[1]) ? $arguments[1] : '';
+			$text = $arguments[1] ?? '';
 			$this->writeFormatted($arguments[0], $color, '', $text ?: ', ');
 		}
+	}
+
+	public function write(string $message): void
+	{
+		$this->output->write($message);
+	}
+
+	public function writeln(string $message): void
+	{
+		$this->output->writeln($message);
 	}
 
 	/**

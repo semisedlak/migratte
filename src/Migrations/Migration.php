@@ -32,14 +32,14 @@ abstract class Migration
 		return NULL;
 	}
 
-	public static function isBreakpoint()
+	public static function isBreakpoint(): bool
 	{
 		return static::down() === NULL;
 	}
 
 	public function isCommitted(): bool
 	{
-		return $this->committedAt ? TRUE : FALSE;
+		return (bool) $this->committedAt;
 	}
 
 	public function getCommittedAt(): ?DateTimeImmutable

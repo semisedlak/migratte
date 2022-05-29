@@ -33,21 +33,21 @@ class Kernel
 		$tableName = $table->getName();
 
 		$sql = '-- noop';
-		if ($driver instanceof SqliteDriver || $driver instanceof Sqlite3Driver) {
+		if ($driver instanceof SqliteDriver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS "$tableName"
 (
-	"{$table->primaryKey}" INTEGER PRIMARY KEY AUTOINCREMENT, 
-	"{$table->fileName}" TEXT, 
-	"{$table->committedAt}" DATETIME DEFAULT NULL
+	"$table->primaryKey" INTEGER PRIMARY KEY AUTOINCREMENT, 
+	"$table->fileName" TEXT, 
+	"$table->committedAt" DATETIME DEFAULT NULL
 )
 SQL;
 		} elseif ($driver instanceof MySqlDriver || $driver instanceof MySqliDriver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS `$tableName` (
-	`{$table->primaryKey}` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `{$table->fileName}` int NOT NULL,
-	`{$table->committedAt}` datetime NULL
+	`$table->primaryKey` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `$table->fileName` int NOT NULL,
+	`$table->committedAt` datetime NULL
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 SQL;
 		}
@@ -88,9 +88,8 @@ SQL;
 	public function parseMigrationClassName(string $fileName): string
 	{
 		$datetime = $this->parseMigrationTimestamp($fileName);
-		$className = 'Migration_' . $datetime;
 
-		return $className;
+		return 'Migration_' . $datetime;
 	}
 
 	public function parseMigrationTimestamp(string $fileName): string
