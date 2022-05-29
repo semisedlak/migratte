@@ -35,22 +35,20 @@ class CommitCommand extends Command
 		$commitPerformed = FALSE;
 		$count = 0;
 		foreach ($migrationFiles as $migrationFile) {
+			require_once $this->kernel->getMigrationPath($migrationFile);
+
 			if ($this->kernel->getMigration($migrationFile)) {
 				continue;
 			}
 			$commitPerformed = TRUE;
 
 			$this->write('Migration "' . $migrationFile . '" commit ... ');
-			$className = $this->kernel->parseMigrationClassName($migrationFile);
-
-			require_once $this->kernel->getMigrationPath($migrationFile);
-
-			/** @var Migration $migration */
-			$migration = new $className($this->kernel, $migrationFile);
+			/** @var Migration $migrationClass */
+			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
 
 			$connection->begin();
 			try {
-				$connection->nativeQuery($migration::up());
+				$connection->nativeQuery($migrationClass::up());
 
 				$connection->insert($table->getName(), [
 					$table->fileName    => $migrationFile,

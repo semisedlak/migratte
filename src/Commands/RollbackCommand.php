@@ -34,22 +34,19 @@ class RollbackCommand extends Command
 		while ($lastMigration = $this->kernel->getLastMigration()) {
 			$rollbackPerformed = TRUE;
 			$migrationFile = $lastMigration[$table->fileName];
-
-			$this->write('Migration "' . $migrationFile . '" rollback ... ');
-			$className = $this->kernel->parseMigrationClassName($migrationFile);
-
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
-			/** @var Migration $migration */
-			$migration = new $className($this->kernel, $migrationFile);
+			$this->write('Migration "' . $migrationFile . '" rollback ... ');
+			/** @var Migration $migrationClass */
+			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
 
 			$connection->begin();
 			try {
-				if ($migration::isBreakpoint()) {
+				if ($migrationClass::isBreakpoint()) {
 					throw new Exception('Migration is breakpoint and thus rollback is unable');
 				}
 
-				$connection->nativeQuery($migration::down());
+				$connection->nativeQuery($migrationClass::down());
 
 				$connection->delete($table->getName())
 					->where('%n = %i', $table->primaryKey, $lastMigration[$table->primaryKey])
