@@ -21,6 +21,7 @@ class Application
 				Commands\CommitCommand::class,
 				Commands\RollbackCommand::class,
 				Commands\StatusCommand::class,
+				Commands\InfoCommand::class,
 			];
 		}
 
