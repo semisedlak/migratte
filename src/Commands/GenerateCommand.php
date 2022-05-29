@@ -11,12 +11,13 @@ use Symfony\Component\Console\Question\Question;
 
 class GenerateCommand extends Command
 {
+	protected static $defaultName = 'migratte:generate';
+
 	private const ARGUMENT_NAME = 'name';
 
 	protected function configure()
 	{
-		$this->setName('migratte:generate')
-			->setDescription('Generate new migration file')
+		$this->setDescription('Generate new migration file')
 			->addArgument(self::ARGUMENT_NAME, InputArgument::OPTIONAL, 'Migration name');
 	}
 

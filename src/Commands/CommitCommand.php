@@ -11,12 +11,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CommitCommand extends Command
 {
+	protected static $defaultName = 'migratte:commit';
+
 	private const ARGUMENT_LIMIT = 'limit';
 
 	protected function configure()
 	{
-		$this->setName('migratte:commit')
-			->setDescription('Commit (run) migrations')
+		$this->setDescription('Commit (run) migrations')
 			->addArgument(self::ARGUMENT_LIMIT, InputArgument::OPTIONAL, 'Number of migrations to commit', 99999);
 	}
 

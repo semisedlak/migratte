@@ -10,12 +10,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RollbackCommand extends Command
 {
+	protected static $defaultName = 'migratte:rollback';
+
 	private const ARGUMENT_LIMIT = 'limit';
 
 	protected function configure()
 	{
-		$this->setName('migratte:rollback')
-			->setDescription('Rollback migrations')
+		$this->setDescription('Rollback migrations')
 			->addArgument(self::ARGUMENT_LIMIT, InputArgument::OPTIONAL, 'Number of migrations to rollback', 1);
 	}
 

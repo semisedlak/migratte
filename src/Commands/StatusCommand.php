@@ -10,10 +10,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class StatusCommand extends Command
 {
+	protected static $defaultName = 'migratte:status';
+
 	protected function configure()
 	{
-		$this->setName('migratte:status')
-			->setDescription('Show migrations status');
+		$this->setDescription('Show migrations status');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
