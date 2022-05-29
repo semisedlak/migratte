@@ -14,9 +14,12 @@ class Kernel
 {
 	private Config $config;
 
-	public function __construct(Config $config)
+	private array $commandClasses;
+
+	public function __construct(Config $config, array $commandClasses = [])
 	{
 		$this->config = $config;
+		$this->commandClasses = $commandClasses;
 
 		$this->prepare();
 	}
@@ -55,6 +58,11 @@ SQL;
 	public function getConfig(): Config
 	{
 		return $this->config;
+	}
+
+	public function getCommandClasses(): array
+	{
+		return $this->commandClasses;
 	}
 
 	public function getMigrationFilesList(): array

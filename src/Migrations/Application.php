@@ -15,9 +15,6 @@ class Application
 	{
 		$application = new ConsoleApplication(self::NAME, self::VERSION);
 
-		$config = new Config($options);
-		$kernel = new Kernel($config);
-
 		if (empty($commandClasses)) {
 			$commandClasses = [
 				Commands\GenerateCommand::class,
@@ -26,6 +23,9 @@ class Application
 				Commands\StatusCommand::class,
 			];
 		}
+
+		$config = new Config($options);
+		$kernel = new Kernel($config, $commandClasses);
 
 		foreach ($commandClasses as $commandClass) {
 			$reflection = new ReflectionClass($commandClass);
