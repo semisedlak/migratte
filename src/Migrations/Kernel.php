@@ -118,7 +118,7 @@ SQL;
 		if ($row) {
 			$committedAtDate = $row[$table->committedAt];
 			if ($committedAtDate instanceof DateTime) {
-				$dateTime = $committedAtDate;
+				$dateTime = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $committedAtDate->format('Y-m-d H:i:s'));
 			} else {
 				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate);
 			}
