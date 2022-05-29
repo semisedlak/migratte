@@ -64,7 +64,6 @@ class GenerateCommand extends Command
 	private function getMigrationTemplate(string $name, DateTime $date)
 	{
 		$nowClassName = $date->format('Ymd_His');
-		$nowCreated = $date->format('Y-m-d H:i:s');
 
 		$contents = <<<PHP
 <?php
@@ -76,11 +75,6 @@ class Migration_$nowClassName extends Migration
 	public static function getName(): string
 	{
 		return '$name';
-	}
-
-	public static function getCreated(): \DateTimeImmutable
-	{
-		return new \DateTimeImmutable('$nowCreated');
 	}
 
 	public static function up(): string

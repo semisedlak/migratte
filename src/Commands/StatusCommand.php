@@ -2,6 +2,7 @@
 
 namespace Semisedlak\Migratte\Commands;
 
+use DateTime;
 use Semisedlak\Migratte\Migrations\Migration;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
@@ -39,7 +40,7 @@ class StatusCommand extends Command
 			/** @var Migration $migration */
 			$migration = new $className($this->kernel);
 			$committedAt = $this->kernel->getCommittedAt($migrationFile);
-			$createdAt = $migration::getCreated();
+			$createdAt = DateTime::createFromFormat('\M\i\g\r\a\t\i\o\n_Ymd_His', $className);
 			$isCommitted = $committedAt ? TRUE : FALSE;
 			$isBreakpoint = $migration::isBreakpoint();
 			$name = $migration::getName();

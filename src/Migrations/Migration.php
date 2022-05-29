@@ -8,24 +8,47 @@ abstract class Migration
 {
 	private Kernel $kernel;
 
-	public function __construct(Kernel $kernel)
+	private ?string $fileName = NULL;
+
+	private ?DateTimeImmutable $committedAt = NULL;
+
+	public function __construct(
+		Kernel             $kernel,
+		?string            $fileName = NULL,
+		?DateTimeImmutable $committedAt = NULL
+	)
 	{
 		$this->kernel = $kernel;
+		$this->fileName = $fileName;
+		$this->committedAt = $committedAt;
 	}
 
 	abstract public static function getName(): string;
 
-	abstract public static function getCreated(): DateTimeImmutable;
-
 	abstract public static function up(): string;
+
+	public static function down(): ?string
+	{
+		return NULL;
+	}
 
 	public static function isBreakpoint()
 	{
 		return static::down() === NULL;
 	}
 
-	public static function down(): ?string
+	public function isCommitted(): bool
 	{
-		return NULL;
+		return $this->committedAt ? TRUE : FALSE;
+	}
+
+	public function getCommittedAt(): ?DateTimeImmutable
+	{
+		return $this->committedAt;
+	}
+
+	public function getFileName(): ?string
+	{
+		return $this->fileName;
 	}
 }
