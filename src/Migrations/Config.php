@@ -37,6 +37,8 @@ class Config
 			],
 		];
 
+		$options = array_filter($options);
+
 		$this->options = array_merge($baseOptions, $options);
 		$this->options['migrationsTable'] = array_merge($baseOptions['migrationsTable'], $options['migrationsTable'] ?? []);
 
