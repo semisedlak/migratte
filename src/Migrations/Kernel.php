@@ -144,4 +144,11 @@ SQL;
 
 		return $row ?: NULL;
 	}
+
+	public function getMigrationPath(string $migrationFile): string
+	{
+		$config = $this->getConfig();
+
+		return $config->migrationsDir . '/' . $migrationFile;
+	}
 }

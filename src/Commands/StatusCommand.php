@@ -35,13 +35,15 @@ class StatusCommand extends Command
 		foreach ($migrationFiles as $migrationFile) {
 			$i++;
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			require_once $config->migrationsDir . '/' . $migrationFile;
+			$committedAt = $this->kernel->getCommittedAt($migrationFile);
+
+			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($this->kernel);
-			$committedAt = $this->kernel->getCommittedAt($migrationFile);
+			$migration = new $className($this->kernel, $migrationFile, $committedAt);
+
 			$createdAt = DateTime::createFromFormat('\M\i\g\r\a\t\i\o\n_Ymd_His', $className);
-			$isCommitted = $committedAt ? TRUE : FALSE;
+			$isCommitted = $migration->isCommitted();
 			$isBreakpoint = $migration::isBreakpoint();
 			$name = $migration::getName();
 
@@ -63,7 +65,7 @@ class StatusCommand extends Command
 				'name'       => $this->prepareOutput($name, $isBreakpoint ? 'yellow' : 'white'),
 				'committed'  => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
 				'created'    => $createdAt->format('Y-m-d H:i:s'),
-				'file'       => $migrationFile,
+				'file'       => $migration->getFileName(),
 			];
 
 			if ($isCommitted && $migration::isBreakpoint() && $i < count($migrationFiles)) {
@@ -77,7 +79,7 @@ class StatusCommand extends Command
 				->setHeaders([
 					'No.',
 					'Done',
-					' BP',
+					'BP',
 					'Migration name',
 					'Committed at',
 					'Created at',

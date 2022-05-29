@@ -25,7 +25,6 @@ class GenerateCommand extends Command
 	{
 		parent::execute($input, $output);
 
-		$config = $this->kernel->getConfig();
 		$originalName = $this->input->getArgument(self::ARGUMENT_NAME);
 		$name = $this->getMigrationName($originalName);
 
@@ -36,7 +35,7 @@ class GenerateCommand extends Command
 
 		$filename = "$nowClassName-$modifiedName.php";
 		$this->write('Generating migration file "' . $filename . '" ... ');
-		file_put_contents($config->migrationsDir . '/' . $filename, $contents);
+		file_put_contents($this->kernel->getMigrationPath($filename), $contents);
 
 		$this->writelnSuccess(' DONE ');
 

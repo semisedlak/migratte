@@ -34,12 +34,14 @@ class RollbackCommand extends Command
 		while ($lastMigration = $this->kernel->getLastMigration()) {
 			$rollbackPerformed = TRUE;
 			$migrationFile = $lastMigration[$table->fileName];
+
 			$this->write('Migration "' . $migrationFile . '" rollback ... ');
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			require_once $config->migrationsDir . '/' . $migrationFile;
+
+			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($this->kernel);
+			$migration = new $className($this->kernel, $migrationFile);
 
 			$connection->begin();
 			try {

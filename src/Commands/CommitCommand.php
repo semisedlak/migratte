@@ -42,10 +42,11 @@ class CommitCommand extends Command
 
 			$this->write('Migration "' . $migrationFile . '" commit ... ');
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			require_once $config->migrationsDir . '/' . $migrationFile;
+
+			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($this->kernel);
+			$migration = new $className($this->kernel, $migrationFile);
 
 			$connection->begin();
 			try {
