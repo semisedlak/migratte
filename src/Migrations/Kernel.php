@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS "$tableName"
 SQL;
 		} elseif ($driver instanceof MySqlDriver || $driver instanceof MySqliDriver) {
 			$sql = <<<SQL
-CREATE TABLE `$tableName` (
+CREATE TABLE IF NOT EXISTS `$tableName` (
 	`{$table->primaryKey}` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `{$table->fileName}` int NOT NULL,
 	`{$table->committedAt}` datetime NULL
