@@ -48,7 +48,7 @@ SQL;
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS `$tableName` (
 	`$table->primaryKey` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `$table->fileName` int NOT NULL,
+    `$table->fileName` varchar(255) NOT NULL,
 	`$table->committedAt` datetime NULL
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 SQL;
