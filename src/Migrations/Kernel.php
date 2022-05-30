@@ -99,7 +99,7 @@ SQL;
 		return substr($fileName, 0, 15);
 	}
 
-	public function getLastMigration(string $strategy = self::ROLLBACK_BY_DATE): ?Row
+	public function getAllMigrations(string $strategy = self::ROLLBACK_BY_DATE): array
 	{
 		$connection = $this->config->getConnection();
 		$table = $this->config->getTable();
@@ -113,12 +113,12 @@ SQL;
 				$field = $table->primaryKey;
 		}
 
-		$row = $connection->select('*')
+		$rows = $connection->select('*')
 			->from('%n', $table->getName())
 			->orderBy('%n DESC', $field)
-			->fetch();
+			->fetchAll();
 
-		return $row ?: NULL;
+		return $rows;
 	}
 
 	public function getCommittedAt(string $fileName): ?DateTimeImmutable
