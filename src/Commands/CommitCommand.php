@@ -13,12 +13,17 @@ class CommitCommand extends Command
 {
 	protected static $defaultName = 'migratte:commit';
 
+	private const DEFAULT_LIMIT = 99999;
 	private const ARGUMENT_LIMIT = 'limit';
+	private const OPTION_DATETIME_FROM = 'from';
+	private const OPTION_DATETIME_TO = 'to';
 
 	protected function configure()
 	{
 		$this->setDescription('Commit (run) migrations')
-			->addArgument(self::ARGUMENT_LIMIT, InputArgument::OPTIONAL, 'Number of migrations to commit', 99999);
+			->addArgument(self::ARGUMENT_LIMIT, InputArgument::OPTIONAL, 'Number of migrations to commit', self::DEFAULT_LIMIT)
+			->addOption(self::OPTION_DATETIME_FROM, NULL, InputArgument::OPTIONAL, 'Commit migrations from datetime [format "YYYY-MM-DD HH:mm:ss"]', NULL)
+			->addOption(self::OPTION_DATETIME_TO, NULL, InputArgument::OPTIONAL, 'Commit migrations to datetime [format "YYYY-MM-DD HH:mm:ss"]', NULL);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
@@ -29,6 +34,30 @@ class CommitCommand extends Command
 		$connection = $config->getConnection();
 		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
+		$fromDate = $input->getOption(self::OPTION_DATETIME_FROM);
+		$toDate = $input->getOption(self::OPTION_DATETIME_TO);
+
+		if (!is_null($fromDate)) {
+			$fromDate = DateTime::createFromFormat('Y-m-d H:i:s', $fromDate);
+			if (!$fromDate) {
+				throw new Exception('Date option "from" contains incorrect value');
+			}
+			$this->writeYellow('Committing from minimal date: ');
+			$this->writelnWarning(' ' . $fromDate->format('Y-m-d H:i:s') . ' ');
+		}
+
+		if (!is_null($toDate)) {
+			$toDate = DateTime::createFromFormat('Y-m-d H:i:s', $toDate);
+			if (!$toDate) {
+				throw new Exception('Date option "to" contains incorrect value');
+			}
+			$this->writeYellow('Committing up to maximal date: ');
+			$this->writelnWarning(' ' . $toDate->format('Y-m-d H:i:s') . ' ');
+		}
+
+		if ($migrationsLimit != self::DEFAULT_LIMIT) {
+			$this->writelnCyan('Limiting to ' . $migrationsLimit . ' migration' . ($migrationsLimit != 1 ? 's' : ''));
+		}
 
 		$migrationFiles = $this->kernel->getMigrationFilesList();
 
@@ -42,9 +71,20 @@ class CommitCommand extends Command
 			}
 			$commitPerformed = TRUE;
 
-			$this->write('Migration "' . $migrationFile . '" commit ... ');
 			/** @var Migration $migrationClass */
 			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
+			$migrationTimestamp = $this->kernel->parseMigrationTimestamp($migrationFile);
+			$created = DateTime::createFromFormat('Ymd_His', $migrationTimestamp);
+
+			if ($fromDate && !$created->diff($fromDate)->invert) {
+				continue;
+			}
+			if ($toDate && $created->diff($toDate)->invert) {
+				continue;
+			}
+
+			$this->write('Migration "' . $migrationFile . '" commit ... ');
+			$count++;
 
 			$connection->begin();
 			try {
@@ -58,7 +98,6 @@ class CommitCommand extends Command
 				$connection->commit();
 
 				$this->writelnSuccess(' DONE ');
-				$count++;
 			} catch (Exception $e) {
 				$connection->rollback();
 				$this->writelnError(' FAILURE ');
