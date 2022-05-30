@@ -83,10 +83,10 @@ class Migration_$nowClassName extends Migration
 SQL;
 	}
 	
-	/*
-	 * You can define "down()" static method for rollback operation
-	 * You can redefine "isBreakpoint()" static method for setting breakpoint
-	 */
+	public static function down(): ?string
+	{
+		return NULL;
+	}
 }
 PHP;
 	}
