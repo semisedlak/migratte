@@ -5,9 +5,11 @@ namespace Semisedlak\Migratte\Migrations;
 use DateTimeImmutable;
 use Dibi\DateTime;
 use Dibi\Drivers\MySqliDriver;
+use Dibi\Drivers\PostgreDriver;
 use Dibi\Drivers\SqliteDriver;
 use Dibi\Row;
 use Nette\Database\Drivers\MySqlDriver;
+use Nette\Database\Drivers\PgSqlDriver;
 
 class Kernel
 {
@@ -51,6 +53,14 @@ CREATE TABLE IF NOT EXISTS `$tableName` (
     `$table->fileName` varchar(255) NOT NULL,
 	`$table->committedAt` datetime NULL
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
+SQL;
+		} elseif ($driver instanceof PgSqlDriver || $driver instanceof PostgreDriver) {
+			$sql = <<<SQL
+CREATE TABLE IF NOT EXISTS $tableName (
+	$table->primaryKey serial PRIMARY KEY,
+    $table->fileName varchar(255) NOT NULL,
+	$table->committedAt timestamp NULL
+);
 SQL;
 		}
 
