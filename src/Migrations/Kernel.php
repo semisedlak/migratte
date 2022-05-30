@@ -5,7 +5,6 @@ namespace Semisedlak\Migratte\Migrations;
 use DateTimeImmutable;
 use Dibi\DateTime;
 use Dibi\Drivers\MySqliDriver;
-use Dibi\Drivers\Sqlite3Driver;
 use Dibi\Drivers\SqliteDriver;
 use Dibi\Row;
 use Nette\Database\Drivers\MySqlDriver;
@@ -15,6 +14,9 @@ class Kernel
 	private Config $config;
 
 	private array $commandClasses;
+
+	public const ROLLBACK_BY_ORDER = 'order';
+	public const ROLLBACK_BY_DATE = 'date';
 
 	public function __construct(Config $config, array $commandClasses = [])
 	{
@@ -97,14 +99,23 @@ SQL;
 		return substr($fileName, 0, 15);
 	}
 
-	public function getLastMigration(): ?Row
+	public function getLastMigration(string $strategy = self::ROLLBACK_BY_DATE): ?Row
 	{
 		$connection = $this->config->getConnection();
 		$table = $this->config->getTable();
 
+		switch ($strategy) {
+			case self::ROLLBACK_BY_ORDER:
+				$field = $table->fileName;
+				break;
+			case self::ROLLBACK_BY_DATE:
+			default:
+				$field = $table->primaryKey;
+		}
+
 		$row = $connection->select('*')
 			->from('%n', $table->getName())
-			->orderBy('%n DESC', $table->primaryKey)
+			->orderBy('%n DESC', $field)
 			->fetch();
 
 		return $row ?: NULL;
