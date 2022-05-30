@@ -15,6 +15,7 @@ class RollbackCommand extends Command
 
 	private const ARGUMENT_LIMIT = 'limit';
 	private const OPTION_STRATEGY = 'strategy';
+	private const OPTION_FORCE = 'force';
 	private const OPTION_DRY_RUN = 'dry-run';
 
 	protected function configure()
@@ -28,6 +29,7 @@ class RollbackCommand extends Command
 				'Rollback strategy (by commit "' . Kernel::ROLLBACK_BY_DATE . '" or by migration "' . Kernel::ROLLBACK_BY_ORDER . '")',
 				Kernel::ROLLBACK_BY_DATE
 			)
+			->addOption(self::OPTION_FORCE, 'f', InputArgument::REQUIRED, 'Run in forced mode (breakpoint migrations will be removed from evidence)')
 			->addOption(self::OPTION_DRY_RUN, 'd', InputArgument::REQUIRED, 'Run in dry-run mode');
 	}
 
@@ -40,6 +42,7 @@ class RollbackCommand extends Command
 		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		$rollbackStrategy = $input->getOption(self::OPTION_STRATEGY);
+		$isForced = $input->getOption(self::OPTION_FORCE);
 		$isDryRun = $input->getOption(self::OPTION_DRY_RUN);
 
 		if ($isDryRun) {
@@ -72,11 +75,22 @@ class RollbackCommand extends Command
 			$connection->begin();
 			try {
 				if ($migrationClass::isBreakpoint()) {
-					throw new Exception('Migration is breakpoint and thus rollback is unable');
+					if ($isForced) {
+						$this->writeWarning(' FORCED BREAKPOINT ');
+						$this->write(' ');
+					} else {
+						throw new Exception('Migration is breakpoint and thus rollback is unable');
+					}
 				}
 
 				if (!$isDryRun) {
-					$connection->nativeQuery($migrationClass::down());
+					$downSql = $migrationClass::down();
+					if ($downSql) {
+						$connection->nativeQuery($downSql);
+					} else {
+						$this->writeFormatted(' NO DOWN SQL ', 'black', 'cyan');
+						$this->write(' ');
+					}
 
 					$connection->delete($table->getName())
 						->where('%n = %i', $table->primaryKey, $migration[$table->primaryKey])
