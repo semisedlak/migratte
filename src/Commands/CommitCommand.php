@@ -96,12 +96,17 @@ class CommitCommand extends Command
 			$connection->begin();
 			try {
 				if (!$isDryRun) {
-					$connection->nativeQuery($migrationClass::up());
+					$tempFile = tempnam(sys_get_temp_dir(), 'migration_');
+					file_put_contents($tempFile, $migrationClass::up());
+
+					$connection->loadFile($tempFile);
 
 					$connection->insert($table->getName(), [
 						$table->fileName    => $migrationFile,
 						$table->committedAt => new DateTime(),
 					])->execute();
+
+					@unlink($tempFile);
 				}
 
 				$connection->commit();

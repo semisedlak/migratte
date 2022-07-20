@@ -86,7 +86,10 @@ class RollbackCommand extends Command
 				if (!$isDryRun) {
 					$downSql = $migrationClass::down();
 					if ($downSql) {
-						$connection->nativeQuery($downSql);
+						$tempFile = tempnam(sys_get_temp_dir(), 'migration_');
+						file_put_contents($tempFile, $downSql);
+
+						$connection->loadFile($tempFile);
 					} else {
 						$this->writeFormatted(' NO DOWN SQL ', 'black', 'cyan');
 						$this->write(' ');
@@ -95,6 +98,10 @@ class RollbackCommand extends Command
 					$connection->delete($table->getName())
 						->where('%n = %i', $table->primaryKey, $migration[$table->primaryKey])
 						->execute();
+
+					if ($downSql) {
+						@unlink($tempFile);
+					}
 				}
 
 				$connection->commit();
