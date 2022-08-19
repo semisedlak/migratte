@@ -105,7 +105,7 @@ HTML;
 <thead>
 	<tr>
 		<th>&uarr;&nbsp;Migration name</th>
-		<th>
+		<th style="text-align:center;">
 			<abbr title="Breakpoint (if rollback is possible)">BP</abbr>
 		</th>
 		<th style="width:100%;">File</th>
@@ -116,7 +116,7 @@ HTML;
 HTML;
 
 			/** @var Migration $migration */
-			foreach ($this->migrations as $migration) {
+			foreach ($this->migrations as $key => $migration) {
 				$committedDate = $migration->isCommitted() ? $migration->getCommittedAt()->format('Y-m-d H:i:s') : '';
 				$editorLink = Helpers::editorUri($this->kernel->getMigrationPath($migration->getFileName()));
 				if ($migration::isBreakpoint()) {
@@ -124,14 +124,15 @@ HTML;
 				} else {
 					$breakpoint = '<abbr title="Rollback can be performed on migration" style="color:green;border:none;">No</abbr>';
 				}
-				$rowStyle = $migration->isCommitted() ? 'background:' . ($migration::isBreakpoint() ? '#ffa' : '#dfc') . ';' : '';
+				$rowStyle = $migration->isCommitted() ? '' : 'background:#' . ($key % 2 == 0 ? 'ffe8e8' : 'ffe5e5') . ';';
+				$nameStyle = $migration->isCommitted() ? '' : 'font-weight:bold;';
 				$fileStyle = $migration->isCommitted() ? 'text-decoration:line-through;' : '';
 
 				$html .= <<<HTML
 <tr style="$rowStyle">
-	<td>{$migration::getName()}</td>
+	<td style="{$nameStyle}white-space:nowrap;">{$migration::getName()}</td>
 	<td style="text-align:center;font-weight:bold;">$breakpoint</td>
-	<td style="$fileStyle">
+	<td style="{$fileStyle}">
 		<code title="{$committedDate}">
 			<a href="$editorLink">{$migration->getFileName()}</a>
 		</code>
