@@ -100,6 +100,7 @@ HTML;
 		$html = '';
 		if ($this->migrationsCount > 0) {
 			$html .= <<<HTML
+<div class="tracy-inner">
 <table style="width:100%;">
 <thead>
 	<tr>
@@ -142,6 +143,7 @@ HTML;
 			$html .= <<<HTML
 </tbody>
 </table>
+</div>
 HTML;
 		}
 
