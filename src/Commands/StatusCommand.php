@@ -5,7 +5,6 @@ namespace Semisedlak\Migratte\Commands;
 use DateTime;
 use Semisedlak\Migratte\Migrations\Migration;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -61,16 +60,12 @@ class StatusCommand extends Command
 			$migrations[] = [
 				'no'         => $number,
 				'migrated'   => $this->prepareOutput($isCommitted ? 'YES' : 'NO', $isCommitted ? 'green' : 'yellow'),
-				'breakpoint' => $isBreakpoint ? $this->prepareOutput(' BP ', 'black', 'yellow') : '',
-				'name'       => $this->prepareOutput($name, $isBreakpoint ? 'yellow' : 'white'),
+				'breakpoint' => $isBreakpoint ? $this->prepareOutput(' BP ', ($isCommitted ? 'white' : 'black'), ($isCommitted ? 'red' : 'yellow')) : '',
+				'name'       => $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
 				'committed'  => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
 				'created'    => $createdAt->format('Y-m-d H:i:s'),
 				'file'       => $migration->getFileName(),
 			];
-
-			if ($isCommitted && $migration::isBreakpoint() && $i < count($migrationFiles)) {
-				$migrations[] = new TableSeparator();
-			}
 		}
 
 		if (count($migrationFiles) > 0) {
