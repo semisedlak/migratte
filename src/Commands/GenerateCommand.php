@@ -57,6 +57,8 @@ class GenerateCommand extends Command
 			}
 		}
 
+		$name = addslashes($name);
+
 		return $name;
 	}
 
