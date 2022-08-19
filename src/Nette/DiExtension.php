@@ -10,6 +10,16 @@ use Semisedlak\Migratte\Tracy\Panel;
 
 class DiExtension extends CompilerExtension
 {
+	private ?bool $debugMode = NULL;
+
+	private ?bool $cliMode = NULL;
+
+	public function __construct(?bool $debugMode = NULL, ?bool $cliMode = NULL)
+	{
+		$this->debugMode = $debugMode;
+		$this->cliMode = $cliMode;
+	}
+
 	public function getConfigSchema(): Schema
 	{
 		return Expect::structure([
@@ -27,7 +37,14 @@ class DiExtension extends CompilerExtension
 
 	public function loadConfiguration(): void
 	{
-		$builder = $this->getContainerBuilder();
+		$container = $this->getContainerBuilder();
+		if ($this->debugMode === NULL) {
+			$this->debugMode = $container->parameters['debugMode'];
+		}
+
+		if ($this->cliMode === NULL) {
+			$this->cliMode = $container->parameters['consoleMode'];
+		}
 
 		if ($this->config->debug) {
 			if (!$this->config->connection) {
@@ -39,14 +56,14 @@ class DiExtension extends CompilerExtension
 			}
 
 			$panelServiceName = $this->prefix('panel');
-			$builder->addDefinition($panelServiceName)
+			$container->addDefinition($panelServiceName)
 				->setFactory(Panel::class, [$this->config]);
 		}
 	}
 
 	public function afterCompile(ClassType $class): void
 	{
-		if ($this->config->debug) {
+		if ($this->config->debug && $this->debugMode && !$this->cliMode) {
 			$initialize = $class->getMethod('initialize');
 			$initialize->addBody('$this->getService(?)->addPanel($this->getService(?));', ['tracy.bar', $this->prefix('panel')]);
 		}
