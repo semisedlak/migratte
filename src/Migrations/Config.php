@@ -53,7 +53,9 @@ class Config
 
 		$dir = $this->options['migrationsDir'];
 		if (!is_dir($dir)) {
-			mkdir($dir, 0777, TRUE);
+			if (!mkdir($dir, 0777, TRUE) && !is_dir($dir)) {
+				throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+			}
 		}
 		$this->options['migrationsDir'] = realpath($dir);
 
