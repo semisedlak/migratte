@@ -19,6 +19,7 @@ class Kernel
 
 	public const ROLLBACK_BY_ORDER = 'order';
 	public const ROLLBACK_BY_DATE = 'date';
+	public const ROLLBACK_BY_FILE = 'file';
 
 	public function __construct(Config $config, array $commandClasses = [])
 	{
@@ -109,7 +110,10 @@ SQL;
 		return substr($fileName, 0, 15);
 	}
 
-	public function getAllMigrations(string $strategy = self::ROLLBACK_BY_DATE): array
+	public function getAllMigrations(
+		string $strategy = self::ROLLBACK_BY_DATE,
+		string $fileName = NULL
+	): array
 	{
 		$connection = $this->config->getConnection();
 		$table = $this->config->getTable();
@@ -123,9 +127,12 @@ SQL;
 				$field = $table->primaryKey;
 		}
 
-		$rows = $connection->select('*')
-			->from('%n', $table->getName())
-			->orderBy('%n DESC', $field)
+		$rowsQuery = $connection->select('*')
+			->from('%n', $table->getName());
+		if ($fileName) {
+			$rowsQuery->where('%n = %s', $table->fileName, $fileName);
+		}
+		$rows = $rowsQuery->orderBy('%n DESC', $field)
 			->fetchAll();
 
 		return $rows;

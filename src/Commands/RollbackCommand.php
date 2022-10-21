@@ -15,22 +15,44 @@ class RollbackCommand extends Command
 
 	private const ARGUMENT_LIMIT = 'limit';
 	private const OPTION_STRATEGY = 'strategy';
+	private const OPTION_FILE = 'file';
 	private const OPTION_FORCE = 'force';
 	private const OPTION_DRY_RUN = 'dry-run';
 
 	protected function configure()
 	{
 		$this->setDescription('Rollback migrations')
-			->addArgument(self::ARGUMENT_LIMIT, InputArgument::OPTIONAL, 'Number of migrations to rollback', 1)
+			->addArgument(
+				self::ARGUMENT_LIMIT,
+				InputArgument::OPTIONAL,
+				'Number of migrations to rollback',
+				1
+			)
+			->addOption(
+				self::OPTION_FILE,
+				NULL,
+				InputArgument::OPTIONAL,
+				'File name of migrations to rollback'
+			)
 			->addOption(
 				self::OPTION_STRATEGY,
 				NULL,
 				InputArgument::OPTIONAL,
-				'Rollback strategy (by commit "' . Kernel::ROLLBACK_BY_DATE . '" or by migration "' . Kernel::ROLLBACK_BY_ORDER . '")',
+				'Rollback strategy (by commit "' . Kernel::ROLLBACK_BY_DATE . '" or by migration "' . Kernel::ROLLBACK_BY_ORDER . '" or by specific "' . Kernel::ROLLBACK_BY_FILE . '")',
 				Kernel::ROLLBACK_BY_DATE
 			)
-			->addOption(self::OPTION_FORCE, 'f', InputArgument::REQUIRED, 'Run in forced mode (breakpoint migrations will be removed from evidence)')
-			->addOption(self::OPTION_DRY_RUN, 'd', InputArgument::REQUIRED, 'Run in dry-run mode');
+			->addOption(
+				self::OPTION_FORCE,
+				'f',
+				InputArgument::REQUIRED,
+				'Run in forced mode (breakpoint migrations will be removed from evidence)'
+			)
+			->addOption(
+				self::OPTION_DRY_RUN,
+				'd',
+				InputArgument::REQUIRED,
+				'Run in dry-run mode'
+			);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
@@ -42,6 +64,7 @@ class RollbackCommand extends Command
 		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		$rollbackStrategy = $input->getOption(self::OPTION_STRATEGY);
+		$migrationFileName = $input->getOption(self::OPTION_FILE);
 		$isForced = $input->getOption(self::OPTION_FORCE);
 		$isDryRun = $input->getOption(self::OPTION_DRY_RUN);
 
@@ -52,15 +75,34 @@ class RollbackCommand extends Command
 		if (!in_array($rollbackStrategy, [
 			Kernel::ROLLBACK_BY_ORDER,
 			Kernel::ROLLBACK_BY_DATE,
+			Kernel::ROLLBACK_BY_FILE,
 		])) {
-			throw new Exception('Unknown rollback strategy: ' . $rollbackStrategy);
+			throw new Exception('Unknown rollback strategy: ' . strtoupper($rollbackStrategy));
+		}
+		if ($migrationFileName) {
+			$rollbackStrategy = Kernel::ROLLBACK_BY_FILE;
+			$extension = strtolower(substr($migrationFileName, -4, 4));
+			if ($extension !== '.php') {
+				$migrationFileName .= '.php';
+			}
 		}
 
-		$this->writelnCyan('Using rollback strategy: by ' . $rollbackStrategy);
+		$this->writeCyan('Using rollback strategy: ' . strtoupper('by ' . $rollbackStrategy) . ' ');
+		$this->writeln($migrationFileName);
+		$this->writeln('');
+
+		if ($rollbackStrategy === Kernel::ROLLBACK_BY_FILE && !$migrationFileName) {
+			$this->writelnError(' No file name provided! ');
+			$this->writeln('');
+			$this->writeCyan('Tip: When rollbacking specific file use following syntax: ');
+			$this->writeln('migratte:rollback --file=migration_file.php');
+
+			return 2;
+		}
 
 		$rollbackPerformed = FALSE;
 		$count = 0;
-		$migrations = $this->kernel->getAllMigrations($rollbackStrategy);
+		$migrations = $this->kernel->getAllMigrations($rollbackStrategy, $migrationFileName);
 		foreach ($migrations as $migration) {
 			$rollbackPerformed = TRUE;
 			$migrationFile = $migration[$table->fileName];
