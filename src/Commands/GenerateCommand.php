@@ -27,6 +27,7 @@ class GenerateCommand extends Command
 
 		$originalName = $this->input->getArgument(self::ARGUMENT_NAME);
 		$name = $this->getMigrationName($originalName);
+		$this->writeln('');
 
 		$now = new DateTime;
 		$nowClassName = $now->format('Ymd_His');

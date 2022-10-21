@@ -93,7 +93,6 @@ class StatusCommand extends Command
 			$this->writeln('');
 			$this->writelnWarning(' No migration files ');
 		}
-		$this->writeln('');
 
 		return 0;
 	}
