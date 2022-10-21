@@ -12,14 +12,19 @@ class StatusCommand extends Command
 {
 	protected static $defaultName = 'migratte:status';
 
+	private const OPTION_COMPACT = 'compact';
+
 	protected function configure()
 	{
-		$this->setDescription('Show migrations status');
+		$this->setDescription('Show migrations status')
+			->addOption(self::OPTION_COMPACT, 'c', NULL, 'Show migrations table output in compact mode');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		parent::execute($input, $output);
+
+		$showCompact = $input->getOption(self::OPTION_COMPACT);
 
 		$config = $this->kernel->getConfig();
 		$migrationFiles = $this->kernel->getMigrationFilesList();
@@ -57,21 +62,34 @@ class StatusCommand extends Command
 				$number = '   ' . $i;
 			}
 
-			$migrations[] = [
-				'no'         => $number,
-				'migrated'   => $this->prepareOutput($isCommitted ? 'YES' : 'NO', $isCommitted ? 'green' : 'yellow'),
-				'breakpoint' => $isBreakpoint ? $this->prepareOutput(' BP ', ($isCommitted ? 'white' : 'black'), ($isCommitted ? 'red' : 'yellow')) : '',
-				'name'       => $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
-				'committed'  => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
-				'created'    => $createdAt->format('Y-m-d H:i:s'),
-				'file'       => $migration->getFileName(),
-			];
+			if ($showCompact) {
+				$migrations[] = [
+					'migrated'  => $this->prepareOutput($isCommitted ? 'YES' : 'NO', $isCommitted ? 'green' : 'yellow'),
+					'name'      => ($isBreakpoint ? $this->prepareOutput('BP', ($isCommitted ? 'white' : 'black'), ($isCommitted ? 'red' : 'yellow')) . ' ' : '') . $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
+					'committed' => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
+				];
+			} else {
+				$migrations[] = [
+					'no'         => $number,
+					'migrated'   => $this->prepareOutput($isCommitted ? 'YES' : 'NO', $isCommitted ? 'green' : 'yellow'),
+					'breakpoint' => $isBreakpoint ? $this->prepareOutput(' BP ', ($isCommitted ? 'white' : 'black'), ($isCommitted ? 'red' : 'yellow')) : '',
+					'name'       => $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
+					'committed'  => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
+					'created'    => $createdAt->format('Y-m-d H:i:s'),
+					'file'       => $migration->getFileName(),
+				];
+			}
 		}
 
 		if (count($migrationFiles) > 0) {
-			$table = new Table($output);
-			$table->setStyle('box-double')
-				->setHeaders([
+			if ($showCompact) {
+				$header = [
+					'Done',
+					'Migration name',
+					'Committed at',
+				];
+			} else {
+				$header = [
 					'No.',
 					'Done',
 					'BP',
@@ -79,7 +97,11 @@ class StatusCommand extends Command
 					'Committed at',
 					'Created at',
 					'File name',
-				])
+				];
+			}
+			$table = new Table($output);
+			$table->setStyle('box-double')
+				->setHeaders($header)
 				->setRows($migrations);
 			$table->render();
 
