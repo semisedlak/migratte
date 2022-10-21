@@ -32,7 +32,8 @@ class RollbackCommand extends Command
 				self::OPTION_FILE,
 				NULL,
 				InputArgument::OPTIONAL,
-				'File name of migrations to rollback'
+				'File name of migrations to rollback',
+				''
 			)
 			->addOption(
 				self::OPTION_STRATEGY,
