@@ -42,8 +42,8 @@ class Kernel
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS "$tableName"
 (
-	"$table->primaryKey" INTEGER PRIMARY KEY AUTOINCREMENT, 
-	"$table->fileName" TEXT, 
+	"$table->primaryKey" INTEGER PRIMARY KEY AUTOINCREMENT,
+	"$table->fileName" TEXT,
 	"$table->committedAt" DATETIME DEFAULT NULL
 )
 SQL;
@@ -140,16 +140,18 @@ SQL;
 	public function getCommittedAt(string $fileName): ?DateTimeImmutable
 	{
 		$table = $this->config->getTable();
+		$timezone = $this->config->getTimeZone();
 		$row = $this->getMigration($fileName);
 		if ($row) {
 			$committedAtDate = $row[$table->committedAt];
 			if ($committedAtDate instanceof DateTime) {
-				$dateTime = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $committedAtDate->format('Y-m-d H:i:s'));
+				$dateTime = DateTimeImmutable::createFromFormat(
+					'Y-m-d H:i:s',
+					$committedAtDate->setTimezone($timezone)->format('Y-m-d H:i:s'),
+					$timezone
+				);
 			} else {
-				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate);
-			}
-			if ($dateTime) {
-				$dateTime->setTimezone($this->config->getTimeZone());
+				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate, $timezone);
 			}
 
 			return $dateTime ?: null;

@@ -24,6 +24,7 @@ class DiExtension extends CompilerExtension
 	{
 		return Expect::structure([
 			'debug'           => Expect::bool(false),
+			'timezone'        => Expect::string(),
 			'migrationsDir'   => Expect::string(),
 			'migrationsTable' => Expect::structure([
 				'name'        => Expect::string('migrations'),

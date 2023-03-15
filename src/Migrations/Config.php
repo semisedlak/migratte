@@ -24,7 +24,7 @@ class Config
 	{
 		$workingDir = getcwd();
 		$baseOptions = [
-			'timezone'        => 'UTC',
+			'timezone'        => date_default_timezone_get(),
 			'migrationsDir'   => "$workingDir/database/migrations",
 			'migrationsTable' => [
 				'name'        => 'migrations',
@@ -53,8 +53,6 @@ class Config
 			$this->options['migrationsTable']['committedAt']
 		);
 
-		date_default_timezone_set($this->options['timezone']);
-
 		$dir = $this->options['migrationsDir'];
 		if (!is_dir($dir)) {
 			if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
@@ -63,7 +61,7 @@ class Config
 		}
 		$this->options['migrationsDir'] = realpath($dir);
 
-		$this->timeZone = new DateTimeZone(date_default_timezone_get());
+		$this->timeZone = new DateTimeZone($this->options['timezone']);
 		$this->connection = new Connection($this->options['connection']);
 	}
 

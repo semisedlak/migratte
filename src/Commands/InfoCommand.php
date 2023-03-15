@@ -26,7 +26,7 @@ class InfoCommand extends Command
 
 		$rows = [
 			[
-				'Time zone:',
+				'Timezone:',
 				$this->prepareOutput($config->timezone, 'cyan'),
 			],
 			[

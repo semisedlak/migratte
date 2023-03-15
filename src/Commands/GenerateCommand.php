@@ -30,6 +30,7 @@ class GenerateCommand extends Command
 		$this->writeln('');
 
 		$now = new DateTime;
+		$now->setTimezone($this->kernel->getConfig()->getTimeZone());
 		$nowClassName = $now->format('Ymd_His');
 		$contents = $this->getMigrationTemplate($name, $now);
 		$modifiedName = $this->prepareName($name);

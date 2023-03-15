@@ -158,6 +158,7 @@ HTML;
 		$migrationsDir = $config->migrationsDir;
 		$migrationsDatabase = $config->getConnection()->getConfig('database');
 		$migrationsTable = $config->getTable()->getName();
+		$timezone = $config->getTimeZone()->getName();
 
 		return <<<HTML
 <br>
@@ -181,6 +182,10 @@ HTML;
 <tr>
 	<td>Table</td>
 	<td><code>$migrationsTable</code></td>
+</tr>
+<tr>
+	<td>Timezone</td>
+	<td><code>$timezone</code></td>
 </tr>
 </tbody>
 </table>
