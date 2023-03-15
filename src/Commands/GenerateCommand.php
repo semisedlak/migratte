@@ -43,9 +43,9 @@ class GenerateCommand extends Command
 		return 0;
 	}
 
-	private function getMigrationName(?string $name = NULL, bool $useArgument = TRUE): string
+	private function getMigrationName(?string $name = null, bool $useArgument = true): string
 	{
-		$name = $useArgument ? $name : NULL;
+		$name = $useArgument ? $name : null;
 
 		if (!$name) {
 			/** @var QuestionHelper $helper */
@@ -54,7 +54,7 @@ class GenerateCommand extends Command
 			$name = $helper->ask($this->input, $this->output, $question);
 			if (!$name) {
 				$this->writelnWarning(' Invalid name entered! ');
-				$name = $this->getMigrationName($name, FALSE);
+				$name = $this->getMigrationName($name, false);
 			}
 		}
 
@@ -85,7 +85,7 @@ class Migration_$nowClassName extends Migration
 -- UP: $name
 SQL;
 	}
-	
+
 	public static function down(): ?string
 	{
 		return NULL;

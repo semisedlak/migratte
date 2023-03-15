@@ -17,7 +17,7 @@ class StatusCommand extends Command
 	protected function configure()
 	{
 		$this->setDescription('Show migrations status')
-			->addOption(self::OPTION_COMPACT, 'c', NULL, 'Show migrations table output in compact mode');
+			->addOption(self::OPTION_COMPACT, 'c', null, 'Show migrations table output in compact mode');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
@@ -33,7 +33,7 @@ class StatusCommand extends Command
 		$this->writelnCyan($config->migrationsDir);
 
 		$migrations = [];
-		$pointingOnNext = FALSE;
+		$pointingOnNext = false;
 		$nonCommittedCount = 0;
 		$i = 0;
 		foreach ($migrationFiles as $migrationFile) {
@@ -57,7 +57,7 @@ class StatusCommand extends Command
 
 			if (!$isCommitted && !$pointingOnNext) {
 				$number = '=> ' . $i;
-				$pointingOnNext = TRUE;
+				$pointingOnNext = true;
 			} else {
 				$number = '   ' . $i;
 			}
@@ -65,14 +65,25 @@ class StatusCommand extends Command
 			if ($showCompact) {
 				$migrations[] = [
 					'migrated'  => $this->prepareOutput($isCommitted ? 'YES' : 'NO', $isCommitted ? 'green' : 'yellow'),
-					'name'      => ($isBreakpoint ? $this->prepareOutput('BP', ($isCommitted ? 'white' : 'black'), ($isCommitted ? 'red' : 'yellow')) . ' ' : '') . $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
+					'name'      => ($isBreakpoint ? $this->prepareOutput(
+								'BP',
+								($isCommitted ? 'white' : 'black'),
+								($isCommitted ? 'red' : 'yellow')
+							) . ' ' : '') . $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
 					'committed' => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
 				];
 			} else {
 				$migrations[] = [
 					'no'         => $number,
-					'migrated'   => $this->prepareOutput($isCommitted ? 'YES' : 'NO', $isCommitted ? 'green' : 'yellow'),
-					'breakpoint' => $isBreakpoint ? $this->prepareOutput(' BP ', ($isCommitted ? 'white' : 'black'), ($isCommitted ? 'red' : 'yellow')) : '',
+					'migrated'   => $this->prepareOutput(
+						$isCommitted ? 'YES' : 'NO',
+						$isCommitted ? 'green' : 'yellow'
+					),
+					'breakpoint' => $isBreakpoint ? $this->prepareOutput(
+						' BP ',
+						($isCommitted ? 'white' : 'black'),
+						($isCommitted ? 'red' : 'yellow')
+					) : '',
 					'name'       => $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
 					'committed'  => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
 					'created'    => $createdAt->format('Y-m-d H:i:s'),
@@ -107,7 +118,9 @@ class StatusCommand extends Command
 
 			$this->writeln('');
 			if ($nonCommittedCount > 0) {
-				$this->writelnYellow('Database is ' . $nonCommittedCount . ' migration' . ($nonCommittedCount != 1 ? 's' : '') . ' behind');
+				$this->writelnYellow(
+					'Database is ' . $nonCommittedCount . ' migration' . ($nonCommittedCount != 1 ? 's' : '') . ' behind'
+				);
 			} else {
 				$this->writelnGreen('Database is up-to-date');
 			}

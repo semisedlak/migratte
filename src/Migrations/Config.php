@@ -4,6 +4,7 @@ namespace Semisedlak\Migratte\Migrations;
 
 use DateTimeZone;
 use Dibi\Connection;
+use RuntimeException;
 
 /**
  * @property-read string $migrationsDir
@@ -40,7 +41,10 @@ class Config
 		$options = array_filter($options);
 
 		$this->options = array_merge($baseOptions, $options);
-		$this->options['migrationsTable'] = array_merge($baseOptions['migrationsTable'], $options['migrationsTable'] ?? []);
+		$this->options['migrationsTable'] = array_merge(
+			$baseOptions['migrationsTable'],
+			$options['migrationsTable'] ?? []
+		);
 
 		$this->table = new Table(
 			$this->options['migrationsTable']['name'],
@@ -53,8 +57,8 @@ class Config
 
 		$dir = $this->options['migrationsDir'];
 		if (!is_dir($dir)) {
-			if (!mkdir($dir, 0777, TRUE) && !is_dir($dir)) {
-				throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+			if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+				throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
 			}
 		}
 		$this->options['migrationsDir'] = realpath($dir);
@@ -80,6 +84,6 @@ class Config
 
 	public function __get($name)
 	{
-		return $this->options[$name] ?? NULL;
+		return $this->options[$name] ?? null;
 	}
 }

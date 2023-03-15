@@ -22,10 +22,32 @@ class CommitCommand extends Command
 	protected function configure()
 	{
 		$this->setDescription('Commit (run) migrations')
-			->addArgument(self::ARGUMENT_LIMIT, InputArgument::OPTIONAL, 'Number of migrations to commit', self::DEFAULT_LIMIT)
-			->addOption(self::OPTION_DATETIME_FROM, NULL, InputArgument::OPTIONAL, 'Commit migrations from datetime [format "YYYY-MM-DD HH:mm:ss"]', NULL)
-			->addOption(self::OPTION_DATETIME_TO, NULL, InputArgument::OPTIONAL, 'Commit migrations to datetime [format "YYYY-MM-DD HH:mm:ss"]', NULL)
-			->addOption(self::OPTION_DRY_RUN, 'd', InputArgument::REQUIRED, 'Run in dry-run mode');
+			->addArgument(
+				self::ARGUMENT_LIMIT,
+				InputArgument::OPTIONAL,
+				'Number of migrations to commit',
+				self::DEFAULT_LIMIT
+			)
+			->addOption(
+				self::OPTION_DATETIME_FROM,
+				null,
+				InputArgument::OPTIONAL,
+				'Commit migrations from datetime [format "YYYY-MM-DD HH:mm:ss"]',
+				null
+			)
+			->addOption(
+				self::OPTION_DATETIME_TO,
+				null,
+				InputArgument::OPTIONAL,
+				'Commit migrations to datetime [format "YYYY-MM-DD HH:mm:ss"]',
+				null
+			)
+			->addOption(
+				self::OPTION_DRY_RUN,
+				'd',
+				InputArgument::REQUIRED,
+				'Run in dry-run mode'
+			);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
@@ -68,7 +90,7 @@ class CommitCommand extends Command
 
 		$migrationFiles = $this->kernel->getMigrationFilesList();
 
-		$commitPerformed = FALSE;
+		$commitPerformed = false;
 		$count = 0;
 		foreach ($migrationFiles as $migrationFile) {
 			require_once $this->kernel->getMigrationPath($migrationFile);
@@ -76,7 +98,7 @@ class CommitCommand extends Command
 			if ($this->kernel->getMigration($migrationFile)) {
 				continue;
 			}
-			$commitPerformed = TRUE;
+			$commitPerformed = true;
 
 			/** @var Migration $migrationClass */
 			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);

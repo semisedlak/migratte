@@ -25,7 +25,7 @@ class Panel implements IBarPanel
 
 	private float $preparationTime;
 
-	public function __construct($extensionConfig = NULL)
+	public function __construct($extensionConfig = null)
 	{
 		Debugger::timer('migratte');
 		$extensionConfig = json_decode(json_encode($extensionConfig), JSON_OBJECT_AS_ARRAY);
@@ -49,7 +49,7 @@ class Panel implements IBarPanel
 			}
 		}
 
-		$this->migrations = array_reverse($this->migrations, TRUE);
+		$this->migrations = array_reverse($this->migrations, true);
 		$this->migrationsCount = count($this->migrations);
 		$this->preparationTime = round(Debugger::timer('migratte') * 10000) / 10;
 	}
@@ -124,7 +124,8 @@ HTML;
 				} else {
 					$breakpoint = '<abbr title="Rollback can be performed on migration" style="color:green;border:none;">No</abbr>';
 				}
-				$rowStyle = $migration->isCommitted() ? '' : 'background:#' . ($key % 2 == 0 ? 'ffe8e8' : 'ffe5e5') . ';';
+				$rowStyle = $migration->isCommitted(
+				) ? '' : 'background:#' . ($key % 2 == 0 ? 'ffe8e8' : 'ffe5e5') . ';';
 				$nameStyle = $migration->isCommitted() ? '' : 'font-weight:bold;';
 				$fileStyle = $migration->isCommitted() ? 'text-decoration:line-through;' : '';
 

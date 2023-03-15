@@ -8,16 +8,15 @@ abstract class Migration
 {
 	private Kernel $kernel;
 
-	private ?string $fileName = NULL;
+	private ?string $fileName = null;
 
-	private ?DateTimeImmutable $committedAt = NULL;
+	private ?DateTimeImmutable $committedAt = null;
 
 	public function __construct(
-		Kernel             $kernel,
-		?string            $fileName = NULL,
-		?DateTimeImmutable $committedAt = NULL
-	)
-	{
+		Kernel $kernel,
+		?string $fileName = null,
+		?DateTimeImmutable $committedAt = null
+	) {
 		$this->kernel = $kernel;
 		$this->fileName = $fileName;
 		$this->committedAt = $committedAt;
@@ -29,12 +28,12 @@ abstract class Migration
 
 	public static function down(): ?string
 	{
-		return NULL;
+		return null;
 	}
 
 	public static function isBreakpoint(): bool
 	{
-		return static::down() === NULL;
+		return static::down() === null;
 	}
 
 	public function isCommitted(): bool

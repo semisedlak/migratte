@@ -18,8 +18,7 @@ class Table
 		string $primaryKey,
 		string $fileName,
 		string $commitedAt
-	)
-	{
+	) {
 		$this->name = $name;
 		$this->fields = [
 			'primaryKey'  => $primaryKey,
@@ -35,6 +34,6 @@ class Table
 
 	public function __get($name): ?string
 	{
-		return $this->fields[$name] ?? NULL;
+		return $this->fields[$name] ?? null;
 	}
 }

@@ -65,26 +65,25 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $foregroundColor
-	 * @param string       $backgroundColor
-	 * @param string       $separator
+	 * @param string $foregroundColor
+	 * @param string $backgroundColor
+	 * @param string $separator
 	 */
 	protected function writelnFormatted(
 		$message,
 		string $foregroundColor = '',
 		string $backgroundColor = '',
 		string $separator = PHP_EOL
-	): void
-	{
+	): void {
 		$output = $this->prepareOutput($message, $foregroundColor, $backgroundColor, $separator);
 		$this->output->writeln($output);
 	}
 
 	/**
 	 * @param string|array $message
-	 * @param string       $foregroundColor
-	 * @param string       $backgroundColor
-	 * @param string       $separator
+	 * @param string $foregroundColor
+	 * @param string $backgroundColor
+	 * @param string $separator
 	 *
 	 * @return string
 	 */
@@ -93,8 +92,7 @@ abstract class Command extends SymfonyCommand
 		string $foregroundColor = '',
 		string $backgroundColor = '',
 		string $separator = PHP_EOL
-	): string
-	{
+	): string {
 		$allowedColors = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white', 'default'];
 
 		$fg = $foregroundColor != '' && in_array($foregroundColor, $allowedColors) ? 'fg=' . $foregroundColor : '';
@@ -117,17 +115,16 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $foregroundColor
-	 * @param string       $backgroundColor
-	 * @param string       $separator
+	 * @param string $foregroundColor
+	 * @param string $backgroundColor
+	 * @param string $separator
 	 */
 	protected function writeFormatted(
 		$message,
 		string $foregroundColor = '',
 		string $backgroundColor = '',
 		string $separator = ', '
-	): void
-	{
+	): void {
 		$output = $this->prepareOutput($message, $foregroundColor, $backgroundColor, $separator);
 		$this->output->write($output);
 	}
@@ -145,7 +142,7 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $separator
+	 * @param string $separator
 	 */
 	protected function writelnSuccess($message, string $separator = PHP_EOL): void
 	{
@@ -154,7 +151,7 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $separator
+	 * @param string $separator
 	 */
 	protected function writeSuccess($message, string $separator = PHP_EOL): void
 	{
@@ -163,7 +160,7 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $separator
+	 * @param string $separator
 	 */
 	protected function writelnWarning($message, string $separator = PHP_EOL): void
 	{
@@ -172,7 +169,7 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $separator
+	 * @param string $separator
 	 */
 	protected function writeWarning($message, string $separator = PHP_EOL): void
 	{
@@ -181,7 +178,7 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $separator
+	 * @param string $separator
 	 */
 	protected function writelnError($message, string $separator = PHP_EOL): void
 	{
@@ -190,7 +187,7 @@ abstract class Command extends SymfonyCommand
 
 	/**
 	 * @param string|array $message
-	 * @param string       $separator
+	 * @param string $separator
 	 */
 	protected function writeError($message, string $separator = PHP_EOL): void
 	{

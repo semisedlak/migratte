@@ -30,14 +30,14 @@ class RollbackCommand extends Command
 			)
 			->addOption(
 				self::OPTION_FILE,
-				NULL,
+				null,
 				InputArgument::OPTIONAL,
 				'File name of migrations to rollback',
 				''
 			)
 			->addOption(
 				self::OPTION_STRATEGY,
-				NULL,
+				null,
 				InputArgument::OPTIONAL,
 				'Rollback strategy (by commit "' . Kernel::ROLLBACK_BY_DATE . '" or by migration "' . Kernel::ROLLBACK_BY_ORDER . '" or by specific "' . Kernel::ROLLBACK_BY_FILE . '")',
 				Kernel::ROLLBACK_BY_DATE
@@ -101,11 +101,11 @@ class RollbackCommand extends Command
 			return 2;
 		}
 
-		$rollbackPerformed = FALSE;
+		$rollbackPerformed = false;
 		$count = 0;
 		$migrations = $this->kernel->getAllMigrations($rollbackStrategy, $migrationFileName);
 		foreach ($migrations as $migration) {
-			$rollbackPerformed = TRUE;
+			$rollbackPerformed = true;
 			$migrationFile = $migration[$table->fileName];
 			require_once $this->kernel->getMigrationPath($migrationFile);
 

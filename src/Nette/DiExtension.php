@@ -10,11 +10,11 @@ use Semisedlak\Migratte\Tracy\Panel;
 
 class DiExtension extends CompilerExtension
 {
-	private ?bool $debugMode = NULL;
+	private ?bool $debugMode = null;
 
-	private ?bool $cliMode = NULL;
+	private ?bool $cliMode = null;
 
-	public function __construct(?bool $debugMode = NULL, ?bool $cliMode = NULL)
+	public function __construct(?bool $debugMode = null, ?bool $cliMode = null)
 	{
 		$this->debugMode = $debugMode;
 		$this->cliMode = $cliMode;
@@ -23,7 +23,7 @@ class DiExtension extends CompilerExtension
 	public function getConfigSchema(): Schema
 	{
 		return Expect::structure([
-			'debug'           => Expect::bool(FALSE),
+			'debug'           => Expect::bool(false),
 			'migrationsDir'   => Expect::string(),
 			'migrationsTable' => Expect::structure([
 				'name'        => Expect::string('migrations'),
@@ -38,18 +38,18 @@ class DiExtension extends CompilerExtension
 	public function loadConfiguration(): void
 	{
 		$container = $this->getContainerBuilder();
-		if ($this->debugMode === NULL) {
+		if ($this->debugMode === null) {
 			$this->debugMode = $container->parameters['debugMode'];
 		}
 
-		if ($this->cliMode === NULL) {
+		if ($this->cliMode === null) {
 			$this->cliMode = $container->parameters['consoleMode'];
 		}
 
 		if ($this->config->debug) {
 			if (!$this->config->connection) {
 				$extensions = $this->compiler->getExtensions();
-				$dibiExtension = $extensions['dibi'] ?? NULL;
+				$dibiExtension = $extensions['dibi'] ?? null;
 				if ($dibiExtension) {
 					$this->config->connection = $dibiExtension->getConfig();
 				}
@@ -65,7 +65,10 @@ class DiExtension extends CompilerExtension
 	{
 		if ($this->config->debug && $this->debugMode && !$this->cliMode) {
 			$initialize = $class->getMethod('initialize');
-			$initialize->addBody('$this->getService(?)->addPanel($this->getService(?));', ['tracy.bar', $this->prefix('panel')]);
+			$initialize->addBody(
+				'$this->getService(?)->addPanel($this->getService(?));',
+				['tracy.bar', $this->prefix('panel')]
+			);
 		}
 	}
 }

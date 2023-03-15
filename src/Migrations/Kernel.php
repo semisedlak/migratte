@@ -82,7 +82,7 @@ SQL;
 	{
 		$migrationFiles = [];
 		$handle = opendir($this->config->migrationsDir);
-		while (FALSE !== ($entry = readdir($handle))) {
+		while (false !== ($entry = readdir($handle))) {
 			if (!is_dir($this->config->migrationsDir . '/' . $entry)) {
 				$fileNameParts = explode('.', $entry);
 				$extension = strtolower(end($fileNameParts));
@@ -112,9 +112,8 @@ SQL;
 
 	public function getAllMigrations(
 		string $strategy = self::ROLLBACK_BY_DATE,
-		string $fileName = NULL
-	): array
-	{
+		string $fileName = null
+	): array {
 		$connection = $this->config->getConnection();
 		$table = $this->config->getTable();
 
@@ -153,10 +152,10 @@ SQL;
 				$dateTime->setTimezone($this->config->getTimeZone());
 			}
 
-			return $dateTime ?: NULL;
+			return $dateTime ?: null;
 		}
 
-		return NULL;
+		return null;
 	}
 
 	public function getMigration(string $migrationFile): ?Row
@@ -169,7 +168,7 @@ SQL;
 			->where('%n = %s', $table->fileName, $migrationFile)
 			->fetch();
 
-		return $row ?: NULL;
+		return $row ?: null;
 	}
 
 	public function getMigrationPath(string $migrationFile): string
