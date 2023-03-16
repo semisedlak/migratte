@@ -9,7 +9,7 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 class Application
 {
 	public const NAME = 'Migratte';
-	public const VERSION = '0.3.0';
+	public const VERSION = '0.3.1';
 
 	public static function boot(array $options = [], array $commandClasses = []): ConsoleApplication
 	{
