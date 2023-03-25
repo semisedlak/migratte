@@ -25,8 +25,7 @@ class InfoCommand extends Command
 		$driver = $config->getConnection()->getDriver();
 		$table = $config->getTable();
 
-		/** @var array $connection */
-		$connection = $options['connection'];
+		$connection = $options['connection'] ?? [];
 
 		$rows = [
 			[
