@@ -15,7 +15,7 @@ class GenerateCommand extends Command
 
 	private const ARGUMENT_NAME = 'name';
 
-	protected function configure()
+	protected function configure(): void
 	{
 		$this->setDescription('Generate new migration file')
 			->addArgument(self::ARGUMENT_NAME, InputArgument::OPTIONAL, 'Migration name');
@@ -25,6 +25,7 @@ class GenerateCommand extends Command
 	{
 		parent::execute($input, $output);
 
+		/** @var string|null $originalName */
 		$originalName = $this->input->getArgument(self::ARGUMENT_NAME);
 		$name = $this->getMigrationName($originalName);
 		$this->writeln('');
@@ -46,16 +47,19 @@ class GenerateCommand extends Command
 
 	private function getMigrationName(?string $name = null, bool $useArgument = true): string
 	{
+		/** @var string|null $name */
 		$name = $useArgument ? $name : null;
 
 		if (!$name) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 			$question = new Question($this->prepareOutput('Migration name: ', 'cyan'));
+			/** @var string|null $name */
 			$name = $helper->ask($this->input, $this->output, $question);
 			if (!$name) {
 				$this->writelnWarning(' Invalid name entered! ');
-				$name = $this->getMigrationName($name, false);
+				/** @var string $name */
+				$name = $this->getMigrationName(null, false);
 			}
 		}
 
@@ -98,7 +102,10 @@ PHP;
 	private function prepareName(?string $name): ?string
 	{
 		if ($name) {
-			$name = trim(preg_replace('#[^a-z\d]+#i', '-', strtolower($name)), '-');
+			$name = preg_replace('#[^a-z\d]+#i', '-', strtolower($name));
+			if ($name) {
+				$name = trim($name, '-');
+			}
 		}
 
 		return $name;

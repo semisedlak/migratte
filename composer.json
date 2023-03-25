@@ -1,5 +1,15 @@
 {
 	"name": "semisedlak/migratte",
+	"description": "Migratte is a simple database migration tool for PHP.",
+	"keywords": [
+		"database",
+		"migration",
+		"migratte",
+		"mysql",
+		"mariadb",
+		"postgresql",
+		"sqlite"
+	],
 	"type": "library",
 	"license": "MIT",
 	"authors": [
@@ -13,6 +23,9 @@
 		"dibi/dibi": "^4",
 		"symfony/console": "^4",
 		"ext-json": "*"
+	},
+	"require-dev": {
+		"phpstan/phpstan": "*"
 	},
 	"autoload": {
 		"psr-4": {

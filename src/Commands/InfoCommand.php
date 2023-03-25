@@ -11,7 +11,7 @@ class InfoCommand extends Command
 {
 	protected static $defaultName = 'migratte:info';
 
-	protected function configure()
+	protected function configure(): void
 	{
 		$this->setDescription('Show migrations configuration info');
 	}
@@ -21,8 +21,12 @@ class InfoCommand extends Command
 		parent::execute($input, $output);
 
 		$config = $this->kernel->getConfig();
+		$options = $config->getOptions();
 		$driver = $config->getConnection()->getDriver();
 		$table = $config->getTable();
+
+		/** @var array $connection */
+		$connection = $options['connection'];
 
 		$rows = [
 			[
@@ -53,7 +57,7 @@ class InfoCommand extends Command
 			new TableSeparator(),
 			[
 				'Driver:',
-				$this->prepareOutput($config->connection['driver'], 'cyan'),
+				$this->prepareOutput($connection['driver'] ?? 'N/A', 'cyan'),
 			],
 			[
 				'Driver class:',
@@ -61,23 +65,23 @@ class InfoCommand extends Command
 			],
 			[
 				'Host:',
-				$this->prepareOutput($config->connection['host'] ?? '', 'cyan'),
+				$this->prepareOutput($connection['host'] ?? '', 'cyan'),
 			],
 			[
 				'Database:',
-				$this->prepareOutput($config->connection['database'] ?? 'N/A', 'cyan'),
+				$this->prepareOutput($connection['database'] ?? 'N/A', 'cyan'),
 			],
 			[
 				'User:',
-				$this->prepareOutput($config->connection['user'] ?? '', 'cyan'),
+				$this->prepareOutput($connection['user'] ?? '', 'cyan'),
 			],
 			[
 				'Password:',
-				$this->prepareOutput(str_repeat('*', strlen($config->connection['pass'] ?? '')), 'cyan'),
+				$this->prepareOutput(str_repeat('*', strlen($connection['pass'] ?? '')), 'cyan'),
 			],
 			[
 				'Charset:',
-				$this->prepareOutput($config->connection['charset'] ?? '', 'cyan'),
+				$this->prepareOutput($connection['charset'] ?? '', 'cyan'),
 			],
 		];
 
@@ -94,10 +98,13 @@ class InfoCommand extends Command
 		$rows = [];
 		/** @var Command $commandClass */
 		foreach ($this->kernel->getCommandClasses() as $commandClass) {
-			$rows[] = [
-				$this->prepareOutput($commandClass::getDefaultName(), 'yellow'),
-				$commandClass,
-			];
+			$commandDefaultName = $commandClass::getDefaultName();
+			if ($commandDefaultName) {
+				$rows[] = [
+					$this->prepareOutput($commandDefaultName, 'yellow'),
+					$commandClass,
+				];
+			}
 		}
 		$table = new Table($output);
 		$table->setStyle('box-double')

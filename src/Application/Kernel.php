@@ -1,6 +1,6 @@
 <?php
 
-namespace Semisedlak\Migratte\Migrations;
+namespace Semisedlak\Migratte\Application;
 
 use DateTimeImmutable;
 use Dibi\DateTime;
@@ -15,12 +15,17 @@ class Kernel
 {
 	private Config $config;
 
+	/** @var array<class-string> */
 	private array $commandClasses;
 
 	public const ROLLBACK_BY_ORDER = 'order';
 	public const ROLLBACK_BY_DATE = 'date';
 	public const ROLLBACK_BY_FILE = 'file';
 
+	/**
+	 * @param Config              $config
+	 * @param array<class-string> $commandClasses
+	 */
 	public function __construct(Config $config, array $commandClasses = [])
 	{
 		$this->config = $config;
@@ -73,15 +78,24 @@ SQL;
 		return $this->config;
 	}
 
+	/**
+	 * @return array<class-string>
+	 */
 	public function getCommandClasses(): array
 	{
 		return $this->commandClasses;
 	}
 
+	/**
+	 * @return array<string>
+	 */
 	public function getMigrationFilesList(): array
 	{
 		$migrationFiles = [];
 		$handle = opendir($this->config->migrationsDir);
+		if ($handle === false) {
+			throw new \RuntimeException('Cannot open migrations directory');
+		}
 		while (false !== ($entry = readdir($handle))) {
 			if (!is_dir($this->config->migrationsDir . '/' . $entry)) {
 				$fileNameParts = explode('.', $entry);
@@ -110,6 +124,11 @@ SQL;
 		return substr($fileName, 0, 15);
 	}
 
+	/**
+	 * @param string      $strategy
+	 * @param string|null $fileName
+	 * @return array<Row>
+	 */
 	public function getAllMigrations(
 		string $strategy = self::ROLLBACK_BY_DATE,
 		string $fileName = null
@@ -131,10 +150,9 @@ SQL;
 		if ($fileName) {
 			$rowsQuery->where('%n = %s', $table->fileName, $fileName);
 		}
-		$rows = $rowsQuery->orderBy('%n DESC', $field)
-			->fetchAll();
 
-		return $rows;
+		return $rowsQuery->orderBy('%n DESC', $field)
+			->fetchAll();
 	}
 
 	public function getCommittedAt(string $fileName): ?DateTimeImmutable
@@ -143,6 +161,7 @@ SQL;
 		$timezone = $this->config->getTimeZone();
 		$row = $this->getMigration($fileName);
 		if ($row) {
+			/** @var DateTime|string $committedAtDate */
 			$committedAtDate = $row[$table->committedAt];
 			if ($committedAtDate instanceof DateTime) {
 				$dateTime = DateTimeImmutable::createFromFormat(
@@ -165,12 +184,13 @@ SQL;
 		$connection = $this->config->getConnection();
 		$table = $this->config->getTable();
 
+		/** @var Row|null $row */
 		$row = $connection->select('*')
 			->from('%n', $table->getName())
 			->where('%n = %s', $table->fileName, $migrationFile)
 			->fetch();
 
-		return $row ?: null;
+		return $row;
 	}
 
 	public function getMigrationPath(string $migrationFile): string

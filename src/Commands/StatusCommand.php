@@ -14,7 +14,7 @@ class StatusCommand extends Command
 
 	private const OPTION_COMPACT = 'compact';
 
-	protected function configure()
+	protected function configure(): void
 	{
 		$this->setDescription('Show migrations status')
 			->addOption(self::OPTION_COMPACT, 'c', null, 'Show migrations table output in compact mode');
@@ -44,7 +44,7 @@ class StatusCommand extends Command
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($this->kernel, $migrationFile, $committedAt);
+			$migration = new $className($migrationFile, $committedAt);
 
 			$createdAt = DateTime::createFromFormat('\M\i\g\r\a\t\i\o\n_Ymd_His', $className);
 			$isCommitted = $migration->isCommitted();
@@ -70,7 +70,7 @@ class StatusCommand extends Command
 								($isCommitted ? 'white' : 'black'),
 								($isCommitted ? 'red' : 'yellow')
 							) . ' ' : '') . $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
-					'committed' => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
+					'committed' => $isCommitted && $committedAt ? $committedAt->format('Y-m-d H:i:s') : '-',
 				];
 			} else {
 				$migrations[] = [
@@ -85,8 +85,8 @@ class StatusCommand extends Command
 						($isCommitted ? 'red' : 'yellow')
 					) : '',
 					'name'       => $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
-					'committed'  => $isCommitted ? $committedAt->format('Y-m-d H:i:s') : '-',
-					'created'    => $createdAt->format('Y-m-d H:i:s'),
+					'committed'  => $isCommitted && $committedAt ? $committedAt->format('Y-m-d H:i:s') : '-',
+					'created'    => $createdAt ? $createdAt->format('Y-m-d H:i:s') : 'N/A',
 					'file'       => $migration->getFileName(),
 				];
 			}

@@ -3,7 +3,7 @@
 namespace Semisedlak\Migratte\Commands;
 
 use Exception;
-use Semisedlak\Migratte\Migrations\Kernel;
+use Semisedlak\Migratte\Application\Kernel;
 use Semisedlak\Migratte\Migrations\Migration;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,7 +19,7 @@ class RollbackCommand extends Command
 	private const OPTION_FORCE = 'force';
 	private const OPTION_DRY_RUN = 'dry-run';
 
-	protected function configure()
+	protected function configure(): void
 	{
 		$this->setDescription('Rollback migrations')
 			->addArgument(
@@ -64,7 +64,9 @@ class RollbackCommand extends Command
 		$connection = $config->getConnection();
 		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
+		/** @var string $rollbackStrategy */
 		$rollbackStrategy = $input->getOption(self::OPTION_STRATEGY);
+		/** @var string|null $migrationFileName */
 		$migrationFileName = $input->getOption(self::OPTION_FILE);
 		$isForced = $input->getOption(self::OPTION_FORCE);
 		$isDryRun = $input->getOption(self::OPTION_DRY_RUN);
@@ -89,7 +91,9 @@ class RollbackCommand extends Command
 		}
 
 		$this->writeCyan('Using rollback strategy: ' . strtoupper('by ' . $rollbackStrategy) . ' ');
-		$this->writeln($migrationFileName);
+		if ($migrationFileName) {
+			$this->writeln($migrationFileName);
+		}
 		$this->writeln('');
 
 		if ($rollbackStrategy === Kernel::ROLLBACK_BY_FILE && !$migrationFileName) {
@@ -106,6 +110,7 @@ class RollbackCommand extends Command
 		$migrations = $this->kernel->getAllMigrations($rollbackStrategy, $migrationFileName);
 		foreach ($migrations as $migration) {
 			$rollbackPerformed = true;
+			/** @var string $migrationFile */
 			$migrationFile = $migration[$table->fileName];
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
@@ -130,6 +135,9 @@ class RollbackCommand extends Command
 					$downSql = $migrationClass::down();
 					if ($downSql) {
 						$tempFile = tempnam(sys_get_temp_dir(), 'migration_');
+						if (!$tempFile) {
+							throw new Exception('Unable to create temporary file');
+						}
 						file_put_contents($tempFile, $downSql);
 
 						$connection->loadFile($tempFile);
@@ -142,7 +150,7 @@ class RollbackCommand extends Command
 						->where('%n = %i', $table->primaryKey, $migration[$table->primaryKey])
 						->execute();
 
-					if ($downSql) {
+					if ($downSql && isset($tempFile)) {
 						@unlink($tempFile);
 					}
 				}

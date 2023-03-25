@@ -6,18 +6,14 @@ use DateTimeImmutable;
 
 abstract class Migration
 {
-	private Kernel $kernel;
+	private string $fileName;
 
-	private ?string $fileName = null;
-
-	private ?DateTimeImmutable $committedAt = null;
+	private ?DateTimeImmutable $committedAt;
 
 	public function __construct(
-		Kernel $kernel,
-		?string $fileName = null,
+		string $fileName,
 		?DateTimeImmutable $committedAt = null
 	) {
-		$this->kernel = $kernel;
 		$this->fileName = $fileName;
 		$this->committedAt = $committedAt;
 	}
@@ -46,7 +42,7 @@ abstract class Migration
 		return $this->committedAt;
 	}
 
-	public function getFileName(): ?string
+	public function getFileName(): string
 	{
 		return $this->fileName;
 	}

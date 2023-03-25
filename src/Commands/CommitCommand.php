@@ -19,7 +19,7 @@ class CommitCommand extends Command
 	private const OPTION_DATETIME_TO = 'to';
 	private const OPTION_DRY_RUN = 'dry-run';
 
-	protected function configure()
+	protected function configure(): void
 	{
 		$this->setDescription('Commit (run) migrations')
 			->addArgument(
@@ -58,7 +58,9 @@ class CommitCommand extends Command
 		$connection = $config->getConnection();
 		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
+		/** @var string|null $fromDate */
 		$fromDate = $input->getOption(self::OPTION_DATETIME_FROM);
+		/** @var string|null $toDate */
 		$toDate = $input->getOption(self::OPTION_DATETIME_TO);
 		$isDryRun = $input->getOption(self::OPTION_DRY_RUN);
 
@@ -104,6 +106,9 @@ class CommitCommand extends Command
 			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
 			$migrationTimestamp = $this->kernel->parseMigrationTimestamp($migrationFile);
 			$created = DateTime::createFromFormat('Ymd_His', $migrationTimestamp);
+			if (!$created) {
+				throw new Exception(sprintf('Cannot parse migration %s timestamp', $migrationFile));
+			}
 
 			if ($fromDate && !$created->diff($fromDate)->invert) {
 				continue;
@@ -119,6 +124,9 @@ class CommitCommand extends Command
 			try {
 				if (!$isDryRun) {
 					$tempFile = tempnam(sys_get_temp_dir(), 'migration_');
+					if (!$tempFile) {
+						throw new Exception('Cannot create temporary file');
+					}
 					file_put_contents($tempFile, $migrationClass::up());
 
 					$connection->loadFile($tempFile);

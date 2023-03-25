@@ -2,9 +2,11 @@
 
 namespace Semisedlak\Migratte\Tracy;
 
-use Semisedlak\Migratte\Migrations\Application;
-use Semisedlak\Migratte\Migrations\Config;
-use Semisedlak\Migratte\Migrations\Kernel;
+use Dibi\Exception;
+use RuntimeException;
+use Semisedlak\Migratte\Application\Application;
+use Semisedlak\Migratte\Application\Config;
+use Semisedlak\Migratte\Application\Kernel;
 use Semisedlak\Migratte\Migrations\Migration;
 use Tracy\Debugger;
 use Tracy\Helpers;
@@ -25,10 +27,19 @@ class Panel implements IBarPanel
 
 	private float $preparationTime;
 
+	/**
+	 * @param array<string>|object $extensionConfig
+	 * @throws Exception
+	 */
 	public function __construct($extensionConfig = null)
 	{
 		Debugger::timer('migratte');
-		$extensionConfig = json_decode(json_encode($extensionConfig), JSON_OBJECT_AS_ARRAY);
+		$encodedConfig = json_encode($extensionConfig);
+		if ($encodedConfig === false) {
+			throw new RuntimeException('Unable to encode configuration');
+		}
+		/** @var array<string|array<string>> $extensionConfig */
+		$extensionConfig = json_decode($encodedConfig, true, 512, JSON_OBJECT_AS_ARRAY);
 
 		$config = new Config($extensionConfig);
 		$this->kernel = new Kernel($config);
@@ -40,7 +51,7 @@ class Panel implements IBarPanel
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($this->kernel, $migrationFile, $committedAt);
+			$migration = new $className($migrationFile, $committedAt);
 
 			$this->migrations[] = $migration;
 
@@ -117,15 +128,14 @@ HTML;
 
 			/** @var Migration $migration */
 			foreach ($this->migrations as $key => $migration) {
-				$committedDate = $migration->isCommitted() ? $migration->getCommittedAt()->format('Y-m-d H:i:s') : '';
+				$committedDate = $migration->isCommitted() && $migration->getCommittedAt() ? $migration->getCommittedAt()->format('Y-m-d H:i:s') : '';
 				$editorLink = Helpers::editorUri($this->kernel->getMigrationPath($migration->getFileName()));
 				if ($migration::isBreakpoint()) {
 					$breakpoint = '<abbr title="Rollback cannot be performed on migration" style="color:red;border:none;">Yes</abbr>';
 				} else {
 					$breakpoint = '<abbr title="Rollback can be performed on migration" style="color:green;border:none;">No</abbr>';
 				}
-				$rowStyle = $migration->isCommitted(
-				) ? '' : 'background:#' . ($key % 2 == 0 ? 'ffe8e8' : 'ffe5e5') . ';';
+				$rowStyle = $migration->isCommitted() ? '' : 'background:#' . ($key % 2 == 0 ? 'ffe8e8' : 'ffe5e5') . ';';
 				$nameStyle = $migration->isCommitted() ? '' : 'font-weight:bold;';
 				$fileStyle = $migration->isCommitted() ? 'text-decoration:line-through;' : '';
 
@@ -156,6 +166,7 @@ HTML;
 	{
 		$config = $this->kernel->getConfig();
 		$migrationsDir = $config->migrationsDir;
+		/** @var string $migrationsDatabase */
 		$migrationsDatabase = $config->getConnection()->getConfig('database');
 		$migrationsTable = $config->getTable()->getName();
 		$timezone = $config->getTimeZone()->getName();

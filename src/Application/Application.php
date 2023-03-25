@@ -1,6 +1,6 @@
 <?php
 
-namespace Semisedlak\Migratte\Migrations;
+namespace Semisedlak\Migratte\Application;
 
 use ReflectionClass;
 use Semisedlak\Migratte\Commands;
@@ -11,6 +11,12 @@ class Application
 	public const NAME = 'Migratte';
 	public const VERSION = '0.3.1';
 
+	/**
+	 * @param array<string|string[]> $options
+	 * @param array<class-string>    $commandClasses
+	 * @return ConsoleApplication
+	 * @throws \ReflectionException
+	 */
 	public static function boot(array $options = [], array $commandClasses = []): ConsoleApplication
 	{
 		$application = new ConsoleApplication(self::NAME, self::VERSION);
@@ -36,7 +42,9 @@ class Application
 				exit(1);
 			}
 
-			$application->add(new $commandClass($kernel));
+			/** @var Commands\Command $command */
+			$command = new $commandClass($kernel);
+			$application->add($command);
 		}
 
 		return $application;

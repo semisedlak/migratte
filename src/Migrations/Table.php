@@ -11,6 +11,7 @@ class Table
 {
 	private string $name;
 
+	/** @var array<string, string> */
 	private array $fields;
 
 	public function __construct(
@@ -32,7 +33,7 @@ class Table
 		return $this->name;
 	}
 
-	public function __get($name): ?string
+	public function __get(string $name): ?string
 	{
 		return $this->fields[$name] ?? null;
 	}

@@ -47,11 +47,12 @@ class DiExtension extends CompilerExtension
 			$this->cliMode = $container->parameters['consoleMode'];
 		}
 
-		if ($this->config->debug) {
-			if (!$this->config->connection) {
+		if (isset($this->config->debug) && $this->config->debug) {
+			if (!isset($this->config->connection) || !$this->config->connection) {
 				$extensions = $this->compiler->getExtensions();
 				$dibiExtension = $extensions['dibi'] ?? null;
 				if ($dibiExtension) {
+					/* @phpstan-ignore-next-line */
 					$this->config->connection = $dibiExtension->getConfig();
 				}
 			}
@@ -64,7 +65,7 @@ class DiExtension extends CompilerExtension
 
 	public function afterCompile(ClassType $class): void
 	{
-		if ($this->config->debug && $this->debugMode && !$this->cliMode) {
+		if (isset($this->config->debug) && $this->config->debug && $this->debugMode && !$this->cliMode) {
 			$initialize = $class->getMethod('initialize');
 			$initialize->addBody(
 				'$this->getService(?)->addPanel($this->getService(?));',
