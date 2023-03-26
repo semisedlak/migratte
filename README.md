@@ -1,6 +1,15 @@
 Migratte
 ========
-Simple SQL migrations management standalone CLI app, framework-agnostic. It is inspired by [Phinx](https://phinx.org/), but it is much simpler, and it doesn't require CakePHP framework to be installed.
+
+- [How it works](#how-it-works)
+- [Migration anatomy](#migration-anatomy)
+- [Configuration](#configuration)
+- [Executable file](#executable-file)
+- [Commands](#commands)
+- [Are you using Nette Framework?](#are-you-using-nette-framework)
+- [Changelog](#changelog)
+
+Migratte is simple SQL migrations management standalone CLI app, framework-agnostic. It is inspired by [Phinx](https://phinx.org/), but it is much simpler, and it doesn't require CakePHP framework to be installed.
 
 You can install it using composer:
 
@@ -210,9 +219,9 @@ migratte:
     debug: true
 ```
 
-# Changelog
+## Changelog
 
-## 0.4.0
+### 0.4.0
 
 Please update your `bin/migrations` executable file `Application` class namespace like this:
 
