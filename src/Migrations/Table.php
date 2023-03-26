@@ -70,4 +70,9 @@ class Table
 
 		return $connection->nativeQuery($sql);
 	}
+
+	public function update(Connection $connection): void
+	{
+
+	}
 }

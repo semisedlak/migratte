@@ -32,7 +32,12 @@ class Kernel
 	private function prepare(): void
 	{
 		$connection = $this->config->getConnection();
+
+		// Support for creating the table if it does not exist
 		$this->config->getTable()->create($connection);
+
+		// Support for adding new columns to the table
+		$this->config->getTable()->update($connection);
 	}
 
 	public function getConfig(): Config
