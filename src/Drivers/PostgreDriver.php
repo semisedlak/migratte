@@ -12,12 +12,13 @@ class PostgreDriver extends AbstractDriver implements IDriver
 	public function createTable(Connection $connection, Table $table): void
 	{
 		$tableName = $table->getName();
+		$schema = $connection->getConfig('schema', 'public');
 		$primaryKey = $table->getPrimaryKey();
 		$fileName = $table->getFileName();
 		$committedAt = $table->getCommittedAt();
 
 		$sql = <<<SQL
-CREATE TABLE IF NOT EXISTS $tableName (
+CREATE TABLE IF NOT EXISTS $schema.$tableName (
 	$primaryKey serial PRIMARY KEY,
     $fileName varchar(255) NOT NULL,
 	$committedAt timestamp NULL
@@ -30,13 +31,13 @@ SQL;
 	public function updateTable(Connection $connection, Table $table): void
 	{
 		$tableName = $table->getName();
+		$schema = $connection->getConfig('schema', 'public');
 		$newColumns = $this->getNewColumns();
 
 		if (!$newColumns) {
 			return;
 		}
 
-		$schema = 'public'; // Replace with your schema if different
 		$columnsQuery = "SELECT column_name FROM information_schema.columns WHERE table_schema = '$schema' AND table_name = '$tableName';";
 		/** @var Row[] $existingColumns */
 		$existingColumns = $connection->nativeQuery($columnsQuery)->fetchAll();
@@ -52,7 +53,7 @@ SQL;
 
 		foreach ($columnsToAdd as $columnName => $columnType) {
 			$sql = <<<SQL
-ALTER TABLE $tableName ADD COLUMN $columnName $columnType;
+ALTER TABLE $schema.$tableName ADD COLUMN $columnName $columnType;
 SQL;
 			$connection->nativeQuery($sql);
 		}
