@@ -3,10 +3,11 @@
 namespace Semisedlak\Migratte\Drivers;
 
 use Dibi\Connection;
+use Dibi\Row;
 use Semisedlak\Migratte\Application\IDriver;
 use Semisedlak\Migratte\Migrations\Table;
 
-class MysqlDriver implements IDriver
+class MysqlDriver extends AbstractDriver implements IDriver
 {
 	public function createTable(Connection $connection, Table $table): void
 	{
@@ -28,5 +29,37 @@ SQL;
 
 	public function updateTable(Connection $connection, Table $table): void
 	{
+		$tableName = $table->getName();
+		$newColumns = $this->getNewColumns();
+
+		if (!$newColumns) {
+			return;
+		}
+
+		$databaseName = $connection->getDatabaseInfo()->name;
+		$columnsQuery = "SHOW COLUMNS FROM `$tableName` IN `$databaseName`;";
+		/** @var Row[] $existingColumns */
+		$existingColumns = $connection->nativeQuery($columnsQuery)->fetchAll();
+
+		$columnsToAdd = $this->getColumnsToAdd(
+			$newColumns,
+			$existingColumns
+		);
+
+		if (!$columnsToAdd) {
+			return;
+		}
+
+		foreach ($columnsToAdd as $columnName => $columnType) {
+			$sql = <<<SQL
+ALTER TABLE `$tableName` ADD COLUMN `$columnName` $columnType;
+SQL;
+			$connection->nativeQuery($sql);
+		}
+	}
+
+	public function getNewColumns(): array
+	{
+		return [];
 	}
 }
