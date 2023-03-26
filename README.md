@@ -26,14 +26,14 @@ $ composer require semisedlak/migratte
 ## How it works
 It is controlled by ([Symfony Console](https://github.com/symfony/console)) CLI commands for:
 
-1. generate new migration
-2. commit migration
-3. rollback migration
-4. showing migrations status
-5. showing configuration info
+1. [generate](#migrattegenerate) new migration
+2. [commit](#migrattecommit) migration
+3. [rollback](#migratterollback) migration
+4. showing migrations [status](#migrattestatus)
+5. showing configuration [info](#migratteinfo)
 
 ## Migration anatomy
-Migrations are simple PHP files keeping plain SQL queries. If plain SQL so why PHP files then? Answer is simple. For keeping "up" (for commit) and "down" (for rollback) SQL queries with additional metadata all together.
+Migrations are simple [PHP files](#migration-anatomy) keeping plain SQL queries. If plain SQL so why PHP files then? Answer is simple. For keeping ["up"](#example-migration) (for [commit](#migrattecommit)) and ["down"](#example-migration) (for [rollback](#migratterollback)) SQL queries with additional metadata all together.
 
 > 💡 Migratte doesn't provide (yet) rich migrations management. It is just a simple tool for executing your SQL queries and it is up to you to write them. You can use any SQL query you want.
 >
@@ -41,7 +41,7 @@ Migrations are simple PHP files keeping plain SQL queries. If plain SQL so why P
 
 Specific migration class extends from basic migration class. It contains timestamp in file name and class name witch should not be modified.
 
-Migration file that doesn't contain "down" method is "breakpoint", that means rollback cannot be performed. BUT! There is an option `--force` to perform rollback with this kind of migration.
+Migration file that doesn't contain `down()` method is "breakpoint", that means rollback cannot be performed. BUT! There is an option `--force` to perform rollback with this kind of migration.
 
 This tool creates it's "memory" in same database as migrations target. It uses [dibi database layer](https://dibiphp.com/) for connection and queries executions.
 
@@ -159,6 +159,8 @@ If you want to change migration name you can change it in `getName()` method. It
 
 Then copy your SQL queries to `up()` and `down()` methods. If `down()` method returns NULL or FALSE it is considered as "breakpoint" migration (it cannot be rollbacked because it doesn't provide "down" operation).
 
+#### Example migration
+
 ```php
 public static function up(): string
 {
@@ -196,14 +198,14 @@ Command performs rollback operation to already committed migrations back to prev
 $ bin/migrations migratte:rollback 3
 ```
 
-If migration doesn't contain "down" method or this method simply returns NULL or FALSE it is considered as "breakpoint". Calling rollback on "breakpoint" will throw an error. This can be bypassed by using `--force` (or `-f`) option.
+If migration doesn't contain `down()` method or this method simply returns NULL or FALSE it is considered as "breakpoint". Calling rollback on "breakpoint" will throw an error. This can be bypassed by using `--force` (or `-f`) option.
 
 #### Rollback strategy
 
 You can specify rollback strategy by using `--strategy` option. There are currently three strategies for rollback:
 
-1. by commit **"date"** (this is default) (`--strategy=date`) - rollback by commit date (last commited migration will be rollbacked first)
-2. by migration **"order"** (`--strategy=order`) - rollback migrations by migrations order (if you sort files by name, you will get migrations order, so last commited file will be rollbacked first)
+1. by commit **"date"** (this is default) (`--strategy=date`) - rollback by commit date (last committed migration will be rollbacked first)
+2. by migration **"order"** (`--strategy=order`) - rollback migrations by migrations order (if you sort files by name, you will get migrations order, so last committed file will be rollbacked first)
 3. by specific **"file"** (`--strategy=file`) - rollback specific migration file. You have to provide migration file name (without path) as `--file` option. Hint: you can omit `.php` extension.
 
 ### `migratte:status`
@@ -215,7 +217,7 @@ There is also an option `--compact` (or `-c`) to show compact table of migration
 Command shows current Migratte configuration.
 
 ## Are you using Nette framework?
-**Great!** You can use Nette DI extension to register a Migratte panel into [Tracy](https://tracy.nette.org/) (something like `migratte:status` and `migratte:info` combined but... in HTML... with styles). It will use "dibi" extension for connection definition.
+**Great!** You can use Nette DI extension to register a Migratte panel into [Tracy](https://tracy.nette.org/) (something like `migratte:status` and `migratte:info` combined but... in HTML... with styles). It will use `dibi` extension for connection definition.
 
 ```neon
 extensions:
