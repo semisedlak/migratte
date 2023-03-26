@@ -6,8 +6,14 @@ Migratte
 - [Configuration](#configuration)
 - [Executable file](#executable-file)
 - [Commands](#commands)
+  - [`migratte:generate`](#migrattegenerate)
+  - [`migratte:commit`](#migrattecommit)
+  - [`migratte:rollback`](#migratterollback)
+  - [`migratte:status`](#migrattestatus)
+  - [`migratte:info`](#migratteinfo)
 - [Are you using Nette Framework?](#are-you-using-nette-framework)
 - [Changelog](#changelog)
+  - [0.4.0](#040)
 
 Migratte is simple SQL migrations management standalone CLI app, framework-agnostic. It is inspired by [Phinx](https://phinx.org/), but it is much simpler, and it doesn't require CakePHP framework to be installed.
 
