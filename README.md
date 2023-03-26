@@ -62,7 +62,7 @@ Create a file `bin/migrations` in the root dir of your project with following co
 #!/usr/bin/env php
 <?php
 
-use Semisedlak\Migratte\Migrations\Application;
+use Semisedlak\Migratte\Application\Application;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -208,4 +208,15 @@ extensions:
 
 migratte:
     debug: true
+```
+
+# Changelog
+
+## 0.4.0
+
+Please update your `bin/migrations` executable file `Application` class namespace like this:
+
+```php
+// use Semisedlak\Migratte\Migrations\Application; // OLD NAMESPACE
+use Semisedlak\Migratte\Application\Application; // NEW NAMESPACE
 ```
