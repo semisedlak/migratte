@@ -4,12 +4,7 @@ namespace Semisedlak\Migratte\Application;
 
 use DateTimeImmutable;
 use Dibi\DateTime;
-use Dibi\Drivers\MySqliDriver;
-use Dibi\Drivers\PostgreDriver;
-use Dibi\Drivers\SqliteDriver;
 use Dibi\Row;
-use Nette\Database\Drivers\MySqlDriver;
-use Nette\Database\Drivers\PgSqlDriver;
 
 class Kernel
 {
@@ -37,43 +32,7 @@ class Kernel
 	private function prepare(): void
 	{
 		$connection = $this->config->getConnection();
-		$driver = $connection->getDriver();
-		$table = $this->config->getTable();
-
-		$tableName = $table->getName();
-		$primaryKey = $table->getPrimaryKey();
-		$fileName = $table->getFileName();
-		$committedAt = $table->getCommittedAt();
-
-		$sql = '-- noop';
-		if ($driver instanceof SqliteDriver) {
-			$sql = <<<SQL
-CREATE TABLE IF NOT EXISTS "$tableName"
-(
-	"$primaryKey" INTEGER PRIMARY KEY AUTOINCREMENT,
-	"$fileName" TEXT,
-	"$committedAt" DATETIME DEFAULT NULL
-)
-SQL;
-		} elseif ($driver instanceof MySqlDriver || $driver instanceof MySqliDriver) {
-			$sql = <<<SQL
-CREATE TABLE IF NOT EXISTS `$tableName` (
-	`$primaryKey` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `$fileName` varchar(255) NOT NULL,
-	`$committedAt` datetime NULL
-) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
-SQL;
-		} elseif ($driver instanceof PgSqlDriver || $driver instanceof PostgreDriver) {
-			$sql = <<<SQL
-CREATE TABLE IF NOT EXISTS $tableName (
-	$primaryKey serial PRIMARY KEY,
-    $fileName varchar(255) NOT NULL,
-	$committedAt timestamp NULL
-);
-SQL;
-		}
-
-		$connection->nativeQuery($sql);
+		$this->config->getTable()->create($connection);
 	}
 
 	public function getConfig(): Config
