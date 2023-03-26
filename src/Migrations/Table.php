@@ -70,6 +70,7 @@ class Table
 
 	public function update(Connection $connection): void
 	{
-
+		$driver = DriverFactory::create($connection);
+		$driver->updateTable($connection, $this);
 	}
 }

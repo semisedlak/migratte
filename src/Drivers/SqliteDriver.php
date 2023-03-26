@@ -26,4 +26,8 @@ SQL;
 
 		$connection->nativeQuery($sql);
 	}
+
+	public function updateTable(Connection $connection, Table $table): void
+	{
+	}
 }
