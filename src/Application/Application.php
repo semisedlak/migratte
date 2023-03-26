@@ -9,7 +9,7 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 class Application
 {
 	public const NAME = 'Migratte';
-	public const VERSION = '0.3.1';
+	public const VERSION = '0.4.0';
 
 	/**
 	 * @param array<string|string[]> $options

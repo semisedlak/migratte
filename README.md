@@ -20,9 +20,13 @@ It is controlled by ([Symfony Console](https://github.com/symfony/console)) CLI 
 ## Migration anatomy
 Migrations are simple PHP files keeping plain SQL queries. If plain SQL so why PHP files then? Answer is simple. For keeping "up" (for commit) and "down" (for rollback) SQL queries with additional metadata all together.
 
-Specific migration class extends from basic migration class. It contains timestamp in file name and class name witch should not be modified. 
+> 💡 Migratte doesn't provide (yet) rich migrations management. It is just a simple tool for executing your SQL queries and it is up to you to write them. You can use any SQL query you want.
+>
+> You can still use [Phinx](https://phinx.org/) with [CakePHP Migrations](https://book.cakephp.org/3.0/en/migrations.html) for migrations management. I recommend [Adminer](https://www.adminer.org/) for database management.
 
-Migration file that doesn't contain "down" method is "breakpoint" - rollback cannot be performed. BUT! There is an option to perform rollback with this kind of migration.
+Specific migration class extends from basic migration class. It contains timestamp in file name and class name witch should not be modified.
+
+Migration file that doesn't contain "down" method is "breakpoint", that means rollback cannot be performed. BUT! There is an option `--force` to perform rollback with this kind of migration.
 
 This tool creates it's "memory" in same database as migrations target. It uses [dibi database layer](https://dibiphp.com/) for connection and queries executions.
 
@@ -71,8 +75,8 @@ Don't forget to change permission using `chmod +x bin/migrations`
 When you run `bin/migrations` in CLI you will see "help" overview with possible commands.
 
 ```
-root@12345:/var/www/html# bin/migrations       
-Migratte 0.1.0
+root@12345:/var/www/html# bin/migrations
+Migratte 0.4.0
 
 Usage:
   command [options] [arguments]
@@ -97,29 +101,100 @@ Available commands:
   migratte:status    Show migrations status
 ```
 
+> 💡 Hint: You can use `--help` (or `-h`) option for each command to see more details.
+
 ### `migratte:generate`
-Command generates new migration file which then can be modified.
+Command generates new migration file which then can be modified. You can specify migration name as first argument. Write it as normal sentence, it will be converted to desired form automatically.
+
+```shell
+$ bin/migrations migratte:generate "Create users table"
+```
+
+This will generate file `database/migrations/20190101_120000-create-users-table.php` with following content:
+
+```php
+<?php
+
+use Semisedlak\Migratte\Migrations\Migration;
+
+class Migration_20190101_120000 extends Migration
+{
+	public static function getName(): string
+	{
+		return 'Create users table';
+	}
+
+	public static function up(): string
+	{
+		return <<<SQL
+-- UP: Create users table
+SQL;
+	}
+
+	public static function down(): ?string
+	{
+		return NULL;
+	}
+}
+```
+
+> ⚠️ Warning! Don't modify migration class name. Don't modify file name after it was committed. You can modify `up()` and `down()` methods to contain your SQL queries.
+
+If you want to change migration name you can change it in `getName()` method. It is used only for displaying purposes.
+
+Then copy your SQL queries to `up()` and `down()` methods. If `down()` method returns NULL or FALSE it is considered as "breakpoint" migration (it cannot be rollbacked because it doesn't provide "down" operation).
+
+```php
+public static function up(): string
+{
+	return <<<SQL
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(255) NOT NULL
+) ENGINE='InnoDB' COLLATE 'utf8mb4_general_ci';
+SQL;
+}
+
+public static function down(): ?string
+{
+	return <<<SQL
+DROP TABLE `users`;
+SQL;
+}
+```
 
 ### `migratte:commit`
-Command commits (runs) new migrations. By default, it will run all non-committed migrations one-by-one. You can specify less to commit with "limit" argument:
+Command commits (runs) new migrations. By default, it will run all non-committed migrations one-by-one. You can specify less to commit with `limit` (first) argument:
 
 ```shell
 $ bin/migrations migratte:commit 3
 ```
 
-But there is more. You can specify datetime limits "from" and "to" for limiting committing.
+But there is more. You can specify datetime limits `--from` and `--to` for limiting committing.
+
+Are you unsure what migrations will be committed? Use `--dry-run` (or `-d`) option to see what migrations will be committed without actually committing them.
 
 ### `migratte:rollback`
-Command performs rollback operation to already committed migrations back to previous state. Rollback will be done only on (by default) one lastly committed migration. You can specify more migrations to rollback with "limit" argument:
+Command performs rollback operation to already committed migrations back to previous state. Rollback will be done only on (by default) one lastly committed migration. You can specify more migrations to rollback with `limit` (first) argument:
 
 ```shell
 $ bin/migrations migratte:rollback 3
 ```
 
-If migration doesn't contain "down" method or this method simply returns NULL or FALSE it is considered as "breakpoint". Calling rollback on "breakpoint" will throw an error. This can be bypassed by using "--force" (or "-f") option.
+If migration doesn't contain "down" method or this method simply returns NULL or FALSE it is considered as "breakpoint". Calling rollback on "breakpoint" will throw an error. This can be bypassed by using `--force` (or `-f`) option.
+
+#### Rollback strategy
+
+You can specify rollback strategy by using `--strategy` option. There are currently three strategies for rollback:
+
+1. by commit **"date"** (this is default) (`--strategy=date`) - rollback by commit date (last commited migration will be rollbacked first)
+2. by migration **"order"** (`--strategy=order`) - rollback migrations by migrations order (if you sort files by name, you will get migrations order, so last commited file will be rollbacked first)
+3. by specific **"file"** (`--strategy=file`) - rollback specific migration file. You have to provide migration file name (without path) as `--file` option. Hint: you can omit `.php` extension.
 
 ### `migratte:status`
 Command shows current migrations' status (what is or isn't committed, which migration is breakpoint and more).
+
+There is also an option `--compact` (or `-c`) to show compact table of migrations.
 
 ### `migratte:info`
 Command shows current Migratte configuration.
