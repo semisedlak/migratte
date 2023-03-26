@@ -43,15 +43,15 @@ class InfoCommand extends Command
 			],
 			[
 				'Primary key:',
-				$this->prepareOutput($table->primaryKey, 'cyan'),
+				$this->prepareOutput($table->getPrimaryKey(), 'cyan'),
 			],
 			[
 				'"File name" field:',
-				$this->prepareOutput($table->fileName, 'cyan'),
+				$this->prepareOutput($table->getFileName(), 'cyan'),
 			],
 			[
 				'"Committed at" field:',
-				$this->prepareOutput($table->committedAt, 'cyan'),
+				$this->prepareOutput($table->getCommittedAt(), 'cyan'),
 			],
 			new TableSeparator(),
 			[

@@ -132,8 +132,8 @@ class CommitCommand extends Command
 					$connection->loadFile($tempFile);
 
 					$connection->insert($table->getName(), [
-						$table->fileName    => $migrationFile,
-						$table->committedAt => new DateTime(),
+						$table->getFileName()    => $migrationFile,
+						$table->getCommittedAt() => new DateTime(),
 					])->execute();
 
 					@unlink($tempFile);

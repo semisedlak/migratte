@@ -60,12 +60,7 @@ class Config
 		/** @var array<string> $connection */
 		$connection = $this->options['connection'];
 
-		$this->table = new Table(
-			$this->options['migrationsTable']['name'],
-			$this->options['migrationsTable']['primaryKey'],
-			$this->options['migrationsTable']['fileName'],
-			$this->options['migrationsTable']['committedAt']
-		);
+		$this->table = new Table($this->options['migrationsTable']);
 
 		/** @var string $dir */
 		$dir = $this->options['migrationsDir'];

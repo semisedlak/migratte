@@ -41,31 +41,34 @@ class Kernel
 		$table = $this->config->getTable();
 
 		$tableName = $table->getName();
+		$primaryKey = $table->getPrimaryKey();
+		$fileName = $table->getFileName();
+		$committedAt = $table->getCommittedAt();
 
 		$sql = '-- noop';
 		if ($driver instanceof SqliteDriver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS "$tableName"
 (
-	"$table->primaryKey" INTEGER PRIMARY KEY AUTOINCREMENT,
-	"$table->fileName" TEXT,
-	"$table->committedAt" DATETIME DEFAULT NULL
+	"$primaryKey" INTEGER PRIMARY KEY AUTOINCREMENT,
+	"$fileName" TEXT,
+	"$committedAt" DATETIME DEFAULT NULL
 )
 SQL;
 		} elseif ($driver instanceof MySqlDriver || $driver instanceof MySqliDriver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS `$tableName` (
-	`$table->primaryKey` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `$table->fileName` varchar(255) NOT NULL,
-	`$table->committedAt` datetime NULL
+	`$primaryKey` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `$fileName` varchar(255) NOT NULL,
+	`$committedAt` datetime NULL
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 SQL;
 		} elseif ($driver instanceof PgSqlDriver || $driver instanceof PostgreDriver) {
 			$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS $tableName (
-	$table->primaryKey serial PRIMARY KEY,
-    $table->fileName varchar(255) NOT NULL,
-	$table->committedAt timestamp NULL
+	$primaryKey serial PRIMARY KEY,
+    $fileName varchar(255) NOT NULL,
+	$committedAt timestamp NULL
 );
 SQL;
 		}
@@ -138,17 +141,17 @@ SQL;
 
 		switch ($strategy) {
 			case self::ROLLBACK_BY_ORDER:
-				$field = $table->fileName;
+				$field = $table->getFileName();
 				break;
 			case self::ROLLBACK_BY_DATE:
 			default:
-				$field = $table->primaryKey;
+				$field = $table->getPrimaryKey();
 		}
 
 		$rowsQuery = $connection->select('*')
 			->from('%n', $table->getName());
 		if ($fileName) {
-			$rowsQuery->where('%n = %s', $table->fileName, $fileName);
+			$rowsQuery->where('%n = %s', $table->getFileName(), $fileName);
 		}
 
 		return $rowsQuery->orderBy('%n DESC', $field)
@@ -162,7 +165,7 @@ SQL;
 		$row = $this->getMigration($fileName);
 		if ($row) {
 			/** @var DateTime|string $committedAtDate */
-			$committedAtDate = $row[$table->committedAt];
+			$committedAtDate = $row[$table->getCommittedAt()];
 			if ($committedAtDate instanceof DateTime) {
 				$dateTime = DateTimeImmutable::createFromFormat(
 					'Y-m-d H:i:s',
@@ -187,7 +190,7 @@ SQL;
 		/** @var Row|null $row */
 		$row = $connection->select('*')
 			->from('%n', $table->getName())
-			->where('%n = %s', $table->fileName, $migrationFile)
+			->where('%n = %s', $table->getFileName(), $migrationFile)
 			->fetch();
 
 		return $row;

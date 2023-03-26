@@ -111,7 +111,7 @@ class RollbackCommand extends Command
 		foreach ($migrations as $migration) {
 			$rollbackPerformed = true;
 			/** @var string $migrationFile */
-			$migrationFile = $migration[$table->fileName];
+			$migrationFile = $migration[$table->getFileName()];
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migrationClass */
@@ -147,7 +147,7 @@ class RollbackCommand extends Command
 					}
 
 					$connection->delete($table->getName())
-						->where('%n = %i', $table->primaryKey, $migration[$table->primaryKey])
+						->where('%n = %i', $table->getPrimaryKey(), $migration[$table->getPrimaryKey()])
 						->execute();
 
 					if ($downSql && isset($tempFile)) {
