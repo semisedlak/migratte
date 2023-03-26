@@ -3,7 +3,6 @@
 namespace Semisedlak\Migratte\Migrations;
 
 use Dibi\Connection;
-use Dibi\Result;
 use Semisedlak\Migratte\Application\DriverFactory;
 
 class Table
@@ -63,12 +62,10 @@ class Table
 		return $this->committedAt;
 	}
 
-	public function create(Connection $connection): Result
+	public function create(Connection $connection): void
 	{
 		$driver = DriverFactory::create($connection);
-		$sql = $driver->getCreateTableSQL($this);
-
-		return $connection->nativeQuery($sql);
+		$driver->createTable($connection, $this);
 	}
 
 	public function update(Connection $connection): void

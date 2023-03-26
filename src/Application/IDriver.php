@@ -2,9 +2,10 @@
 
 namespace Semisedlak\Migratte\Application;
 
+use Dibi\Connection;
 use Semisedlak\Migratte\Migrations\Table;
 
 interface IDriver
 {
-	public function getCreateTableSQL(Table $table): string;
+	public function createTable(Connection $connection, Table $table): void;
 }

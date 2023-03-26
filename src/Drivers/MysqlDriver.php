@@ -2,12 +2,13 @@
 
 namespace Semisedlak\Migratte\Drivers;
 
+use Dibi\Connection;
 use Semisedlak\Migratte\Application\IDriver;
 use Semisedlak\Migratte\Migrations\Table;
 
 class MysqlDriver implements IDriver
 {
-	public function getCreateTableSQL(Table $table): string
+	public function createTable(Connection $connection, Table $table): void
 	{
 		$tableName = $table->getName();
 		$primaryKey = $table->getPrimaryKey();
@@ -22,6 +23,6 @@ CREATE TABLE IF NOT EXISTS `$tableName` (
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 SQL;
 
-		return $sql;
+		$connection->nativeQuery($sql);
 	}
 }
