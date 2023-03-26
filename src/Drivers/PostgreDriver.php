@@ -12,6 +12,7 @@ class PostgreDriver extends AbstractDriver implements IDriver
 	public function createTable(Connection $connection, Table $table): void
 	{
 		$tableName = $table->getName();
+		/** @var string $schema */
 		$schema = $connection->getConfig('schema', 'public');
 		$primaryKey = $table->getPrimaryKey();
 		$fileName = $table->getFileName();
@@ -31,6 +32,7 @@ SQL;
 	public function updateTable(Connection $connection, Table $table): void
 	{
 		$tableName = $table->getName();
+		/** @var string $schema */
 		$schema = $connection->getConfig('schema', 'public');
 		$newColumns = $this->getNewColumns();
 
