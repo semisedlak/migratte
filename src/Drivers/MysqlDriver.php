@@ -58,7 +58,18 @@ SQL;
 
 	public function getMaxGroupNo(): ?int
 	{
-		return 0; // todo implement
+		$tableName = $this->table->getName();
+		$groupNo = $this->table->getGroupNo();
+
+		$sql = <<<SQL
+SELECT MAX(`$groupNo`) AS `max` FROM `$tableName`;
+SQL;
+
+		/** @var int|null $max */
+		$max = $this->connection->nativeQuery($sql)
+			->fetchSingle();
+
+		return $max;
 	}
 
 	public function getNextGroupNo(): int
