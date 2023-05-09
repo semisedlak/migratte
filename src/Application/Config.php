@@ -20,8 +20,6 @@ class Config
 
 	private DateTimeZone $timeZone;
 
-	private Table $table;
-
 	/** @var array<string|string[]> */
 	private array $options;
 
@@ -78,11 +76,9 @@ class Config
 
 		$this->timeZone = new DateTimeZone($timezone);
 		$this->connection = new Connection($connection);
-		$this->driver = DriverFactory::create($this->connection);
-
-		$this->table = new Table(
-			$this->driver,
-			$this->options['migrationsTable']
+		$this->driver = DriverFactory::create(
+			$this->connection,
+			new Table($this->options['migrationsTable'])
 		);
 	}
 
@@ -107,11 +103,6 @@ class Config
 	public function getTimeZone(): DateTimeZone
 	{
 		return $this->timeZone;
-	}
-
-	public function getTable(): Table
-	{
-		return $this->table;
 	}
 
 	/**

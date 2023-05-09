@@ -4,18 +4,17 @@ namespace Semisedlak\Migratte\Drivers;
 
 use Dibi\Row;
 use Semisedlak\Migratte\Application\IDriver;
-use Semisedlak\Migratte\Migrations\Table;
 
 class PostgreDriver extends AbstractDriver implements IDriver
 {
-	public function createTable(Table $table): void
+	public function createTable(): void
 	{
-		$tableName = $table->getName();
+		$tableName = $this->table->getName();
 		/** @var string $schema */
 		$schema = $this->connection->getConfig('schema', 'public');
-		$primaryKey = $table->getPrimaryKey();
-		$fileName = $table->getFileName();
-		$committedAt = $table->getCommittedAt();
+		$primaryKey = $this->table->getPrimaryKey();
+		$fileName = $this->table->getFileName();
+		$committedAt = $this->table->getCommittedAt();
 
 		$sql = <<<SQL
 CREATE TABLE IF NOT EXISTS $schema.$tableName (
@@ -28,9 +27,9 @@ SQL;
 		$this->connection->nativeQuery($sql);
 	}
 
-	public function updateTable(Table $table): void
+	public function updateTable(): void
 	{
-		$tableName = $table->getName();
+		$tableName = $this->table->getName();
 		/** @var string $schema */
 		$schema = $this->connection->getConfig('schema', 'public');
 		$newColumns = $this->getNewColumns();
@@ -60,14 +59,14 @@ SQL;
 		}
 	}
 
-	public function getMaxGroupNo(Table $table): ?int
+	public function getMaxGroupNo(): ?int
 	{
 		return 0; // todo implement
 	}
 
-	public function getNextGroupNo(Table $table): int
+	public function getNextGroupNo(): int
 	{
-		$groupNo = $this->getMaxGroupNo($table);
+		$groupNo = $this->getMaxGroupNo();
 		if (!$groupNo) {
 			return 1;
 		}

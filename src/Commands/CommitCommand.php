@@ -56,8 +56,8 @@ class CommitCommand extends Command
 
 		$config = $this->kernel->getConfig();
 		$connection = $config->getConnection();
-		$table = $config->getTable();
 		$driver = $config->getDriver();
+		$table = $driver->getTable();
 
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		/** @var string|null $fromDate */
@@ -135,7 +135,7 @@ class CommitCommand extends Command
 
 					$connection->loadFile($tempFile);
 
-					$driver->commitMigration($table, $migrationFile, $group);
+					$driver->commitMigration($migrationFile, $group);
 
 					@unlink($tempFile);
 				}

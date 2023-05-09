@@ -3,6 +3,7 @@
 namespace Semisedlak\Migratte\Application;
 
 use ReflectionClass;
+use ReflectionException;
 use Semisedlak\Migratte\Commands;
 use Symfony\Component\Console\Application as ConsoleApplication;
 
@@ -15,7 +16,7 @@ class Application
 	 * @param array<string|string[]> $options
 	 * @param array<class-string>    $commandClasses
 	 * @return ConsoleApplication
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	public static function boot(array $options = [], array $commandClasses = []): ConsoleApplication
 	{

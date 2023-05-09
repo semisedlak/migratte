@@ -63,7 +63,8 @@ class RollbackCommand extends Command
 		$config = $this->kernel->getConfig();
 		$connection = $config->getConnection();
 		$driver = $config->getDriver();
-		$table = $config->getTable();
+		$table = $driver->getTable();
+
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		/** @var string $rollbackStrategy */
 		$rollbackStrategy = $input->getOption(self::OPTION_STRATEGY);
@@ -155,7 +156,7 @@ class RollbackCommand extends Command
 						$this->write(' ');
 					}
 
-					$driver->rollbackMigration($table, $migrationId);
+					$driver->rollbackMigration($migrationId);
 
 					if ($downSql && isset($tempFile)) {
 						@unlink($tempFile);

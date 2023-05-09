@@ -22,8 +22,8 @@ class InfoCommand extends Command
 
 		$config = $this->kernel->getConfig();
 		$options = $config->getOptions();
-		$driver = $config->getConnection()->getDriver();
-		$table = $config->getTable();
+		$dbDriver = $config->getConnection()->getDriver();
+		$table = $config->getDriver()->getTable();
 
 		$connection = $options['connection'] ?? [];
 
@@ -60,7 +60,7 @@ class InfoCommand extends Command
 			],
 			[
 				'Driver class:',
-				$this->prepareOutput(get_class($driver), 'cyan'),
+				$this->prepareOutput(get_class($dbDriver), 'cyan'),
 			],
 			[
 				'Host:',

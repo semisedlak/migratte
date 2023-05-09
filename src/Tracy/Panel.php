@@ -174,7 +174,7 @@ HTML;
 		$migrationsDir = $config->migrationsDir;
 		/** @var string $migrationsDatabase */
 		$migrationsDatabase = $config->getConnection()->getConfig('database');
-		$migrationsTable = $config->getTable()->getName();
+		$migrationsTable = $config->getDriver()->getTable()->getName();
 		$timezone = $config->getTimeZone()->getName();
 
 		return <<<HTML

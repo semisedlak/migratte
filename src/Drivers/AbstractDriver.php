@@ -9,31 +9,34 @@ use Semisedlak\Migratte\Migrations\Table;
 
 class AbstractDriver
 {
-	public Connection $connection;
+	protected Connection $connection;
 
-	public function __construct(Connection $connection)
+	protected Table $table;
+
+	public function __construct(Connection $connection, Table $table)
 	{
 		$this->connection = $connection;
+		$this->table = $table;
 	}
 
-	public function getConnection(): Connection
+	public function getTable(): Table
 	{
-		return $this->connection;
+		return $this->table;
 	}
 
-	public function commitMigration(Table $table, string $fileName, ?int $groupNo = null): void
+	public function commitMigration(string $fileName, ?int $groupNo = null): void
 	{
-		$this->connection->insert($table->getName(), [
-			$table->getFileName()    => $fileName,
-			$table->getGroupNo()     => $groupNo,
-			$table->getCommittedAt() => new DateTime(),
+		$this->connection->insert($this->table->getName(), [
+			$this->table->getFileName()    => $fileName,
+			$this->table->getGroupNo()     => $groupNo,
+			$this->table->getCommittedAt() => new DateTime(),
 		])->execute();
 	}
 
-	public function rollbackMigration(Table $table, int $migrationId): void
+	public function rollbackMigration(int $migrationId): void
 	{
-		$this->connection->delete($table->getName())
-			->where('%n = %i', $table->getPrimaryKey(), $migrationId)
+		$this->connection->delete($this->table->getName())
+			->where('%n = %i', $this->table->getPrimaryKey(), $migrationId)
 			->execute();
 	}
 

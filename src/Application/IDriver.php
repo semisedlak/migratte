@@ -6,17 +6,19 @@ use Semisedlak\Migratte\Migrations\Table;
 
 interface IDriver
 {
-	public function createTable(Table $table): void;
+	public function getTable(): Table;
 
-	public function updateTable(Table $table): void;
+	public function createTable(): void;
 
-	public function commitMigration(Table $table, string $fileName, ?int $groupNo = null): void;
+	public function updateTable(): void;
 
-	public function rollbackMigration(Table $table, int $migrationId): void;
+	public function commitMigration(string $fileName, ?int $groupNo = null): void;
 
-	public function getMaxGroupNo(Table $table): ?int;
+	public function rollbackMigration(int $migrationId): void;
 
-	public function getNextGroupNo(Table $table): int;
+	public function getMaxGroupNo(): ?int;
+
+	public function getNextGroupNo(): int;
 
 	/**
 	 * @return array<string>

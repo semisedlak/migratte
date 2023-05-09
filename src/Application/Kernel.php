@@ -5,6 +5,7 @@ namespace Semisedlak\Migratte\Application;
 use DateTimeImmutable;
 use Dibi\DateTime;
 use Dibi\Row;
+use RuntimeException;
 
 class Kernel
 {
@@ -32,10 +33,10 @@ class Kernel
 	private function prepare(): void
 	{
 		// Support for creating the table if it does not exist
-		$this->config->getTable()->create();
+		$this->config->getDriver()->createTable();
 
 		// Support for adding new columns to the table
-		$this->config->getTable()->update();
+		$this->config->getDriver()->updateTable();
 	}
 
 	public function getConfig(): Config
@@ -59,7 +60,7 @@ class Kernel
 		$migrationFiles = [];
 		$handle = opendir($this->config->migrationsDir);
 		if ($handle === false) {
-			throw new \RuntimeException('Cannot open migrations directory');
+			throw new RuntimeException('Cannot open migrations directory');
 		}
 		while (false !== ($entry = readdir($handle))) {
 			if (!is_dir($this->config->migrationsDir . '/' . $entry)) {
@@ -100,7 +101,7 @@ class Kernel
 	): array {
 		// todo refactor
 		$connection = $this->config->getConnection();
-		$table = $this->config->getTable();
+		$table = $this->config->getDriver()->getTable();
 
 		switch ($strategy) {
 			case self::ROLLBACK_BY_ORDER:
@@ -131,7 +132,7 @@ class Kernel
 	public function getMigration(string $migrationFile): ?Row
 	{
 		$connection = $this->config->getConnection();
-		$table = $this->config->getTable();
+		$table = $this->config->getDriver()->getTable();
 
 		/** @var Row|null $row */
 		$row = $connection->select('*')
@@ -144,7 +145,7 @@ class Kernel
 
 	public function getCommittedAt(?Row $migrationRow): ?DateTimeImmutable
 	{
-		$table = $this->config->getTable();
+		$table = $this->config->getDriver()->getTable();
 		$timezone = $this->config->getTimeZone();
 
 		if ($migrationRow) {
@@ -168,7 +169,7 @@ class Kernel
 
 	public function getGroupNo(?Row $migrationRow): ?int
 	{
-		$table = $this->config->getTable();
+		$table = $this->config->getDriver()->getTable();
 
 		if ($migrationRow) {
 			/** @var int|null $groupNo */
