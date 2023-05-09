@@ -36,11 +36,13 @@ class GenerateCommand extends Command
 		$contents = $this->getMigrationTemplate($name, $now);
 		$modifiedName = $this->prepareName($name);
 
-		$filename = "$nowClassName-$modifiedName.php";
-		$this->write('Generating migration file "' . $filename . '" ... ');
-		file_put_contents($this->kernel->getMigrationPath($filename), $contents);
+		$fileName = "$nowClassName-$modifiedName.php";
+		$filePath = $this->kernel->getMigrationPath($fileName);
+		$this->write('Generating migration file ... ');
+		file_put_contents($filePath, $contents);
 
 		$this->writelnSuccess(' DONE ');
+		$this->writeln("file://$filePath");
 
 		return 0;
 	}
