@@ -90,38 +90,6 @@ class Kernel
 		return substr($fileName, 0, 15);
 	}
 
-	/**
-	 * @param string      $strategy
-	 * @param string|null $fileName
-	 * @return array<Row>
-	 */
-	public function getAllMigrations(
-		string $strategy = self::ROLLBACK_BY_DATE,
-		string $fileName = null
-	): array {
-		// todo refactor
-		$connection = $this->config->getConnection();
-		$table = $this->config->getDriver()->getTable();
-
-		switch ($strategy) {
-			case self::ROLLBACK_BY_ORDER:
-				$field = $table->getFileName();
-				break;
-			case self::ROLLBACK_BY_DATE:
-			default:
-				$field = $table->getPrimaryKey();
-		}
-
-		$rowsQuery = $connection->select('*')
-			->from('%n', $table->getName());
-		if ($fileName) {
-			$rowsQuery->where('%n = %s', $table->getFileName(), $fileName);
-		}
-
-		return $rowsQuery->orderBy('%n DESC', $field)
-			->fetchAll();
-	}
-
 	public function getMigrationPath(string $migrationFile): string
 	{
 		$config = $this->getConfig();

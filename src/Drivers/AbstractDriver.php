@@ -5,6 +5,7 @@ namespace Semisedlak\Migratte\Drivers;
 use DateTime;
 use Dibi\Connection;
 use Dibi\Row;
+use Semisedlak\Migratte\Application\Kernel;
 use Semisedlak\Migratte\Migrations\Table;
 
 class AbstractDriver
@@ -38,6 +39,38 @@ class AbstractDriver
 		$this->connection->delete($this->table->getName())
 			->where('%n = %i', $this->table->getPrimaryKey(), $migrationId)
 			->execute();
+	}
+
+	public function getRollbackMigrationsList(string $strategy, ?string $fileName = null, ?int $limit = null): array
+	{
+		$table = $this->getTable();
+
+		switch ($strategy) {
+			case Kernel::ROLLBACK_BY_ORDER:
+				$sortField = $table->getFileName();
+				break;
+			case Kernel::ROLLBACK_BY_DATE:
+			default:
+				$sortField = $table->getPrimaryKey();
+		}
+
+		$query = $this->connection->select('*')
+			->from('%n', $table->getName());
+
+		if ($strategy == Kernel::ROLLBACK_BY_DATE) {
+			$maxGroupNo = $this->getMaxGroupNo();
+			if (is_numeric($maxGroupNo)) {
+				$query->where('%n = %i', $table->getGroupNo(), $maxGroupNo);
+			} elseif (!$limit) {
+				$limit = 1;
+			}
+		}
+		if ($fileName) {
+			$query->where('%n = %s', $table->getFileName(), $fileName);
+		}
+
+		return $query->orderBy('%n DESC', $sortField)
+			->fetchAll(null, $limit);
 	}
 
 	/**

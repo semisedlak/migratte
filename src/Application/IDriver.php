@@ -16,6 +16,8 @@ interface IDriver
 
 	public function rollbackMigration(int $migrationId): void;
 
+	public function getRollbackMigrationsList(string $strategy, ?string $fileName = null, ?int $limit = null): array;
+
 	public function getMaxGroupNo(): ?int;
 
 	public function getNextGroupNo(): int;

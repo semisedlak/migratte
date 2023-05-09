@@ -25,15 +25,13 @@ class RollbackCommand extends Command
 			->addArgument(
 				self::ARGUMENT_LIMIT,
 				InputArgument::OPTIONAL,
-				'Number of migrations to rollback',
-				1
+				'Number of migrations to rollback'
 			)
 			->addOption(
 				self::OPTION_FILE,
 				null,
 				InputArgument::OPTIONAL,
-				'File name of migrations to rollback',
-				''
+				'File name of migrations to rollback'
 			)
 			->addOption(
 				self::OPTION_STRATEGY,
@@ -65,6 +63,7 @@ class RollbackCommand extends Command
 		$driver = $config->getDriver();
 		$table = $driver->getTable();
 
+		/** @var int|null $migrationsLimit */
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		/** @var string $rollbackStrategy */
 		$rollbackStrategy = $input->getOption(self::OPTION_STRATEGY);
@@ -107,31 +106,33 @@ class RollbackCommand extends Command
 			return 2;
 		}
 
-		$rollbackPerformed = false;
-		$count = 0;
-		$migrations = $this->kernel->getAllMigrations($rollbackStrategy, $migrationFileName);
+		$migrations = $driver->getRollbackMigrationsList(
+			$rollbackStrategy,
+			$migrationFileName,
+			$migrationsLimit
+		);
 
-		$maxGroupNo = $config->getDriver()
-			->getMaxGroupNo();
-		foreach ($migrations as $migration) {
-			if ($rollbackStrategy == Kernel::ROLLBACK_BY_DATE && $migration->group != $maxGroupNo) {
-				continue;
-			}
+		if (!$migrations) {
+			$this->writelnWarning(' No migration to rollback... ');
 
-			$rollbackPerformed = true;
-			/** @var string $migrationFile */
-			$migrationFile = $migration[$table->getFileName()];
-			/** @var int $migrationId */
-			$migrationId = $migration[$table->getPrimaryKey()];
-			require_once $this->kernel->getMigrationPath($migrationFile);
+			return 0;
+		}
 
-			/** @var Migration $migrationClass */
-			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
+		$connection->begin();
 
-			$this->write('Migration "' . $migrationFile . '" rollback ... ');
+		try {
+			foreach ($migrations as $migration) {
+				/** @var string $migrationFile */
+				$migrationFile = $migration[$table->getFileName()];
+				/** @var Migration $migrationClass */
+				$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
+				/** @var int $migrationId */
+				$migrationId = $migration[$table->getPrimaryKey()];
 
-			$connection->begin();
-			try {
+				require_once $this->kernel->getMigrationPath($migrationFile);
+
+				$this->write('Migration "' . $migrationFile . '" rollback ... ');
+
 				if ($migrationClass::isBreakpoint()) {
 					if ($isForced) {
 						$this->writeWarning(' FORCED BREAKPOINT ');
@@ -163,26 +164,17 @@ class RollbackCommand extends Command
 					}
 				}
 
-				$connection->commit();
-				$count++;
-
 				$this->writelnSuccess(' DONE ');
-			} catch (Exception $e) {
-				$connection->rollback();
-				$this->writelnError(' FAILURE ');
-				$this->writelnRed($e->getMessage());
-
-				return 3;
 			}
 
-			// todo refactor
-			if ($rollbackStrategy != Kernel::ROLLBACK_BY_DATE && $count >= $migrationsLimit) {
-				break;
-			}
-		}
+			$connection->commit();
+		} catch (Exception $e) {
+			$connection->rollback();
 
-		if (!$rollbackPerformed) {
-			$this->writelnWarning(' No migration to rollback... ');
+			$this->writelnError(' FAILURE ');
+			$this->writelnRed($e->getMessage());
+
+			return 3;
 		}
 
 		return 0;
