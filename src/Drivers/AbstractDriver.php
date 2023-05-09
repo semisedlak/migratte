@@ -3,6 +3,8 @@
 namespace Semisedlak\Migratte\Drivers;
 
 use DateTime;
+use DateTimeImmutable;
+use DateTimeZone;
 use Dibi\Connection;
 use Dibi\Row;
 use Semisedlak\Migratte\Application\Kernel;
@@ -48,6 +50,27 @@ class AbstractDriver
 		$groupNo = $migrationRow[$this->table->getGroupNo()];
 
 		return $groupNo;
+	}
+
+	public function getMigrationCommittedAt(?Row $migrationRow, DateTimeZone $timeZone): ?DateTimeImmutable
+	{
+		if (!$migrationRow) {
+			return null;
+		}
+
+		/** @var \Dibi\DateTime|string $committedAtDate */
+		$committedAtDate = $migrationRow[$this->table->getCommittedAt()];
+		if ($committedAtDate instanceof DateTime) {
+			$dateTime = DateTimeImmutable::createFromFormat(
+				'Y-m-d H:i:s',
+				$committedAtDate->setTimezone($timeZone)->format('Y-m-d H:i:s'),
+				$timeZone
+			);
+		} else {
+			$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate, $timeZone);
+		}
+
+		return $dateTime ?: null;
 	}
 
 	public function commitMigration(string $fileName, ?int $groupNo = null): void

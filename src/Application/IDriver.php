@@ -2,6 +2,8 @@
 
 namespace Semisedlak\Migratte\Application;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Dibi\Row;
 use Semisedlak\Migratte\Migrations\Table;
 
@@ -16,6 +18,8 @@ interface IDriver
 	public function getMigrationByFileName(string $fileName): ?Row;
 
 	public function getMigrationGroupNo(?Row $migrationRow): ?int;
+
+	public function getMigrationCommittedAt(?Row $migrationRow, DateTimeZone $timeZone): ?DateTimeImmutable;
 
 	public function commitMigration(string $fileName, ?int $groupNo = null): void;
 

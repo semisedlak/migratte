@@ -2,9 +2,6 @@
 
 namespace Semisedlak\Migratte\Application;
 
-use DateTimeImmutable;
-use Dibi\DateTime;
-use Dibi\Row;
 use RuntimeException;
 
 class Kernel
@@ -95,29 +92,5 @@ class Kernel
 		$config = $this->getConfig();
 
 		return $config->migrationsDir . '/' . $migrationFile;
-	}
-
-	public function getCommittedAt(?Row $migrationRow): ?DateTimeImmutable
-	{
-		$table = $this->config->getDriver()->getTable();
-		$timezone = $this->config->getTimeZone();
-
-		if ($migrationRow) {
-			/** @var DateTime|string $committedAtDate */
-			$committedAtDate = $migrationRow[$table->getCommittedAt()];
-			if ($committedAtDate instanceof DateTime) {
-				$dateTime = DateTimeImmutable::createFromFormat(
-					'Y-m-d H:i:s',
-					$committedAtDate->setTimezone($timezone)->format('Y-m-d H:i:s'),
-					$timezone
-				);
-			} else {
-				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate, $timezone);
-			}
-
-			return $dateTime ?: null;
-		}
-
-		return null;
 	}
 }

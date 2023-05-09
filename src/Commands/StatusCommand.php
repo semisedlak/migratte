@@ -41,8 +41,8 @@ class StatusCommand extends Command
 			$i++;
 			$migrationRow = $driver->getMigrationByFileName($migrationFile);
 			$groupNo = $driver->getMigrationGroupNo($migrationRow);
+			$committedAt = $driver->getMigrationCommittedAt($migrationRow, $config->getTimeZone());
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
 			require_once $this->kernel->getMigrationPath($migrationFile);
 

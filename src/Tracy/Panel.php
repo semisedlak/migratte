@@ -48,8 +48,8 @@ class Panel implements IBarPanel
 		foreach ($this->kernel->getMigrationFilesList() as $migrationFile) {
 			$migrationRow = $driver->getMigrationByFileName($migrationFile);
 			$groupNo = $driver->getMigrationGroupNo($migrationRow);
+			$committedAt = $driver->getMigrationCommittedAt($migrationRow, $config->getTimeZone());
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
