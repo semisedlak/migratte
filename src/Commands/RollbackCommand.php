@@ -112,7 +112,7 @@ class RollbackCommand extends Command
 		$migrations = $this->kernel->getAllMigrations($rollbackStrategy, $migrationFileName);
 
 		$maxGroupNo = $config->getDriver()
-			->getMaxGroupNo($table);
+			->getMaxGroupNo();
 		foreach ($migrations as $migration) {
 			if ($rollbackStrategy == Kernel::ROLLBACK_BY_DATE && $migration->group != $maxGroupNo) {
 				continue;
