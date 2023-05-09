@@ -17,15 +17,15 @@ class DriverFactory
 		$driver = $connection->getDriver();
 
 		if ($driver instanceof DibiSqliteDriver) {
-			return new SqliteDriver();
+			return new SqliteDriver($connection);
 		}
 
 		if ($driver instanceof DibiMySqliDriver) {
-			return new MysqlDriver();
+			return new MysqlDriver($connection);
 		}
 
 		if ($driver instanceof DibiPostgreDriver) {
-			return new PostgreDriver();
+			return new PostgreDriver($connection);
 		}
 
 		throw new \InvalidArgumentException(sprintf("Unknown driver %s", get_class($driver)));

@@ -62,6 +62,7 @@ class RollbackCommand extends Command
 
 		$config = $this->kernel->getConfig();
 		$connection = $config->getConnection();
+		$driver = $config->getDriver();
 		$table = $config->getTable();
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		/** @var string $rollbackStrategy */
@@ -108,17 +109,25 @@ class RollbackCommand extends Command
 		$rollbackPerformed = false;
 		$count = 0;
 		$migrations = $this->kernel->getAllMigrations($rollbackStrategy, $migrationFileName);
+
+		$maxGroupNo = $config->getDriver()
+			->getMaxGroupNo($table);
 		foreach ($migrations as $migration) {
+			if ($rollbackStrategy == Kernel::ROLLBACK_BY_DATE && $migration->group != $maxGroupNo) {
+				continue;
+			}
+
 			$rollbackPerformed = true;
 			/** @var string $migrationFile */
 			$migrationFile = $migration[$table->getFileName()];
+			/** @var int $migrationId */
+			$migrationId = $migration[$table->getPrimaryKey()];
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migrationClass */
 			$migrationClass = $this->kernel->parseMigrationClassName($migrationFile);
 
 			$this->write('Migration "' . $migrationFile . '" rollback ... ');
-			$count++;
 
 			$connection->begin();
 			try {
@@ -146,9 +155,7 @@ class RollbackCommand extends Command
 						$this->write(' ');
 					}
 
-					$connection->delete($table->getName())
-						->where('%n = %i', $table->getPrimaryKey(), $migration[$table->getPrimaryKey()])
-						->execute();
+					$driver->rollbackMigration($table, $migrationId);
 
 					if ($downSql && isset($tempFile)) {
 						@unlink($tempFile);
@@ -156,6 +163,7 @@ class RollbackCommand extends Command
 				}
 
 				$connection->commit();
+				$count++;
 
 				$this->writelnSuccess(' DONE ');
 			} catch (Exception $e) {
@@ -166,7 +174,8 @@ class RollbackCommand extends Command
 				return 3;
 			}
 
-			if ($count >= $migrationsLimit) {
+			// todo refactor
+			if ($rollbackStrategy != Kernel::ROLLBACK_BY_DATE && $count >= $migrationsLimit) {
 				break;
 			}
 		}

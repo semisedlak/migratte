@@ -46,12 +46,14 @@ class Panel implements IBarPanel
 
 		foreach ($this->kernel->getMigrationFilesList() as $migrationFile) {
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$committedAt = $this->kernel->getCommittedAt($migrationFile);
+			$migrationRow = $this->kernel->getMigration($migrationFile);
+			$groupNo = $this->kernel->getGroupNo($migrationRow);
+			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($migrationFile, $committedAt);
+			$migration = new $className($migrationFile, $groupNo, $committedAt);
 
 			$this->migrations[] = $migration;
 
@@ -119,6 +121,9 @@ HTML;
 		<th style="text-align:center;">
 			<abbr title="Breakpoint (if rollback is possible)">BP</abbr>
 		</th>
+		<th style="text-align:center;">
+			<abbr title="Group number">Grp</abbr>
+		</th>
 		<th style="width:100%;">File</th>
 	</tr>
 </thead>
@@ -143,6 +148,7 @@ HTML;
 <tr style="$rowStyle">
 	<td style="{$nameStyle}white-space:nowrap;">{$migration::getName()}</td>
 	<td style="text-align:center;font-weight:bold;">$breakpoint</td>
+	<td style="text-align:center;">{$migration->getGroupNo()}</td>
 	<td style="{$fileStyle}">
 		<code title="{$committedDate}">
 			<a href="$editorLink">{$migration->getFileName()}</a>

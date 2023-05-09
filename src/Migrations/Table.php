@@ -2,16 +2,19 @@
 
 namespace Semisedlak\Migratte\Migrations;
 
-use Dibi\Connection;
-use Semisedlak\Migratte\Application\DriverFactory;
+use Semisedlak\Migratte\Application\IDriver;
 
 class Table
 {
+	private IDriver $driver;
+
 	private string $name;
 
 	private string $primaryKey;
 
 	private string $fileName;
+
+	private string $groupNo;
 
 	private string $committedAt;
 
@@ -19,6 +22,7 @@ class Table
 	 * @param array<string> $options
 	 */
 	public function __construct(
+		IDriver $driver,
 		array $options
 	) {
 		if (!isset($options['name'])) {
@@ -36,10 +40,16 @@ class Table
 		}
 		$this->fileName = $options['fileName'];
 
+		if (!isset($options['groupNo'])) {
+			throw new \InvalidArgumentException('Missing groupNo in table schema');
+		}
+		$this->groupNo = $options['groupNo'];
+
 		if (!isset($options['committedAt'])) {
 			throw new \InvalidArgumentException('Missing committedAt in table schema');
 		}
 		$this->committedAt = $options['committedAt'];
+		$this->driver = $driver;
 	}
 
 	public function getName(): string
@@ -57,20 +67,23 @@ class Table
 		return $this->fileName;
 	}
 
+	public function getGroupNo(): string
+	{
+		return $this->groupNo;
+	}
+
 	public function getCommittedAt(): string
 	{
 		return $this->committedAt;
 	}
 
-	public function create(Connection $connection): void
+	public function create(): void
 	{
-		$driver = DriverFactory::create($connection);
-		$driver->createTable($connection, $this);
+		$this->driver->createTable($this);
 	}
 
-	public function update(Connection $connection): void
+	public function update(): void
 	{
-		$driver = DriverFactory::create($connection);
-		$driver->updateTable($connection, $this);
+		$this->driver->updateTable($this);
 	}
 }

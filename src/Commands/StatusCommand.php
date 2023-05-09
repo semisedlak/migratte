@@ -39,12 +39,14 @@ class StatusCommand extends Command
 		foreach ($migrationFiles as $migrationFile) {
 			$i++;
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$committedAt = $this->kernel->getCommittedAt($migrationFile);
+			$migrationRow = $this->kernel->getMigration($migrationFile);
+			$groupNo = $this->kernel->getGroupNo($migrationRow);
+			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
 			/** @var Migration $migration */
-			$migration = new $className($migrationFile, $committedAt);
+			$migration = new $className($migrationFile, $groupNo, $committedAt);
 
 			$createdAt = DateTime::createFromFormat('\M\i\g\r\a\t\i\o\n_Ymd_His', $className);
 			$isCommitted = $migration->isCommitted();
@@ -80,10 +82,11 @@ class StatusCommand extends Command
 						$isCommitted ? 'green' : 'yellow'
 					),
 					'breakpoint' => $isBreakpoint ? $this->prepareOutput(
-						' BP ',
+						'BP',
 						($isCommitted ? 'white' : 'black'),
 						($isCommitted ? 'red' : 'yellow')
 					) : '',
+					'group'      => $groupNo ?: '',
 					'name'       => $this->prepareOutput($name, $isCommitted ? 'white' : 'yellow'),
 					'committed'  => $isCommitted && $committedAt ? $committedAt->format('Y-m-d H:i:s') : '-',
 					'created'    => $createdAt ? $createdAt->format('Y-m-d H:i:s') : 'N/A',
@@ -104,6 +107,7 @@ class StatusCommand extends Command
 					'No.',
 					'Done',
 					'BP',
+					'Grp',
 					'Migration name',
 					'Committed at',
 					'Created at',

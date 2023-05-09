@@ -2,14 +2,13 @@
 
 namespace Semisedlak\Migratte\Drivers;
 
-use Dibi\Connection;
 use Dibi\Row;
 use Semisedlak\Migratte\Application\IDriver;
 use Semisedlak\Migratte\Migrations\Table;
 
 class MysqlDriver extends AbstractDriver implements IDriver
 {
-	public function createTable(Connection $connection, Table $table): void
+	public function createTable(Table $table): void
 	{
 		$tableName = $table->getName();
 		$primaryKey = $table->getPrimaryKey();
@@ -24,10 +23,10 @@ CREATE TABLE IF NOT EXISTS `$tableName` (
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 SQL;
 
-		$connection->nativeQuery($sql);
+		$this->connection->nativeQuery($sql);
 	}
 
-	public function updateTable(Connection $connection, Table $table): void
+	public function updateTable(Table $table): void
 	{
 		$tableName = $table->getName();
 		$newColumns = $this->getNewColumns();
@@ -36,10 +35,10 @@ SQL;
 			return;
 		}
 
-		$databaseName = $connection->getDatabaseInfo()->name;
+		$databaseName = $this->connection->getDatabaseInfo()->name;
 		$columnsQuery = "SHOW COLUMNS FROM `$tableName` IN `$databaseName`;";
 		/** @var Row[] $existingColumns */
-		$existingColumns = $connection->nativeQuery($columnsQuery)->fetchAll();
+		$existingColumns = $this->connection->nativeQuery($columnsQuery)->fetchAll();
 
 		$columnsToAdd = $this->getColumnsToAdd(
 			$newColumns,
@@ -54,12 +53,29 @@ SQL;
 			$sql = <<<SQL
 ALTER TABLE `$tableName` ADD COLUMN `$columnName` $columnType;
 SQL;
-			$connection->nativeQuery($sql);
+			$this->connection->nativeQuery($sql);
 		}
+	}
+
+	public function getMaxGroupNo(Table $table): ?int
+	{
+		return 0; // todo implement
+	}
+
+	public function getNextGroupNo(Table $table): int
+	{
+		$groupNo = $this->getMaxGroupNo($table);
+		if (!$groupNo) {
+			return 1;
+		}
+
+		return $groupNo + 1;
 	}
 
 	public function getNewColumns(): array
 	{
-		return [];
+		return [
+			'group' => 'int NOT NULL',
+		];
 	}
 }

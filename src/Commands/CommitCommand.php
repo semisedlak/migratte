@@ -57,6 +57,8 @@ class CommitCommand extends Command
 		$config = $this->kernel->getConfig();
 		$connection = $config->getConnection();
 		$table = $config->getTable();
+		$driver = $config->getDriver();
+
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		/** @var string|null $fromDate */
 		$fromDate = $input->getOption(self::OPTION_DATETIME_FROM);
@@ -89,6 +91,8 @@ class CommitCommand extends Command
 		if ($migrationsLimit != self::DEFAULT_LIMIT) {
 			$this->writelnCyan('Limiting to ' . $migrationsLimit . ' migration' . ($migrationsLimit != 1 ? 's' : ''));
 		}
+
+		$group = $driver->getNextGroupNo($table);
 
 		$migrationFiles = $this->kernel->getMigrationFilesList();
 
@@ -131,10 +135,7 @@ class CommitCommand extends Command
 
 					$connection->loadFile($tempFile);
 
-					$connection->insert($table->getName(), [
-						$table->getFileName()    => $migrationFile,
-						$table->getCommittedAt() => new DateTime(),
-					])->execute();
+					$driver->commitMigration($table, $migrationFile, $group);
 
 					@unlink($tempFile);
 				}

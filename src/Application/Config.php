@@ -16,6 +16,8 @@ class Config
 {
 	private Connection $connection;
 
+	private IDriver $driver;
+
 	private DateTimeZone $timeZone;
 
 	private Table $table;
@@ -37,6 +39,7 @@ class Config
 				'name'        => 'migrations',
 				'primaryKey'  => 'id',
 				'fileName'    => 'filename',
+				'groupNo'     => 'group',
 				'committedAt' => 'committed_at',
 			],
 			'connection'      => [
@@ -60,8 +63,6 @@ class Config
 		/** @var array<string> $connection */
 		$connection = $this->options['connection'];
 
-		$this->table = new Table($this->options['migrationsTable']);
-
 		/** @var string $dir */
 		$dir = $this->options['migrationsDir'];
 		if (!is_dir($dir)) {
@@ -77,6 +78,12 @@ class Config
 
 		$this->timeZone = new DateTimeZone($timezone);
 		$this->connection = new Connection($connection);
+		$this->driver = DriverFactory::create($this->connection);
+
+		$this->table = new Table(
+			$this->driver,
+			$this->options['migrationsTable']
+		);
 	}
 
 	/**
@@ -90,6 +97,11 @@ class Config
 	public function getConnection(): Connection
 	{
 		return $this->connection;
+	}
+
+	public function getDriver(): IDriver
+	{
+		return $this->driver;
 	}
 
 	public function getTimeZone(): DateTimeZone

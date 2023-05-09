@@ -31,13 +31,11 @@ class Kernel
 
 	private function prepare(): void
 	{
-		$connection = $this->config->getConnection();
-
 		// Support for creating the table if it does not exist
-		$this->config->getTable()->create($connection);
+		$this->config->getTable()->create();
 
 		// Support for adding new columns to the table
-		$this->config->getTable()->update($connection);
+		$this->config->getTable()->update();
 	}
 
 	public function getConfig(): Config
@@ -100,6 +98,7 @@ class Kernel
 		string $strategy = self::ROLLBACK_BY_DATE,
 		string $fileName = null
 	): array {
+		// todo refactor
 		$connection = $this->config->getConnection();
 		$table = $this->config->getTable();
 
@@ -122,28 +121,11 @@ class Kernel
 			->fetchAll();
 	}
 
-	public function getCommittedAt(string $fileName): ?DateTimeImmutable
+	public function getMigrationPath(string $migrationFile): string
 	{
-		$table = $this->config->getTable();
-		$timezone = $this->config->getTimeZone();
-		$row = $this->getMigration($fileName);
-		if ($row) {
-			/** @var DateTime|string $committedAtDate */
-			$committedAtDate = $row[$table->getCommittedAt()];
-			if ($committedAtDate instanceof DateTime) {
-				$dateTime = DateTimeImmutable::createFromFormat(
-					'Y-m-d H:i:s',
-					$committedAtDate->setTimezone($timezone)->format('Y-m-d H:i:s'),
-					$timezone
-				);
-			} else {
-				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate, $timezone);
-			}
+		$config = $this->getConfig();
 
-			return $dateTime ?: null;
-		}
-
-		return null;
+		return $config->migrationsDir . '/' . $migrationFile;
 	}
 
 	public function getMigration(string $migrationFile): ?Row
@@ -160,10 +142,42 @@ class Kernel
 		return $row;
 	}
 
-	public function getMigrationPath(string $migrationFile): string
+	public function getCommittedAt(?Row $migrationRow): ?DateTimeImmutable
 	{
-		$config = $this->getConfig();
+		$table = $this->config->getTable();
+		$timezone = $this->config->getTimeZone();
 
-		return $config->migrationsDir . '/' . $migrationFile;
+		if ($migrationRow) {
+			/** @var DateTime|string $committedAtDate */
+			$committedAtDate = $migrationRow[$table->getCommittedAt()];
+			if ($committedAtDate instanceof DateTime) {
+				$dateTime = DateTimeImmutable::createFromFormat(
+					'Y-m-d H:i:s',
+					$committedAtDate->setTimezone($timezone)->format('Y-m-d H:i:s'),
+					$timezone
+				);
+			} else {
+				$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate, $timezone);
+			}
+
+			return $dateTime ?: null;
+		}
+
+		return null;
+	}
+
+	public function getGroupNo(?Row $migrationRow): ?int
+	{
+		$table = $this->config->getTable();
+
+		if ($migrationRow) {
+			/** @var int|null $groupNo */
+			$groupNo = $migrationRow[$table->getGroupNo()];
+			if ($groupNo !== null) {
+				return $groupNo;
+			}
+		}
+
+		return null;
 	}
 }

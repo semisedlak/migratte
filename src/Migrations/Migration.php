@@ -8,13 +8,17 @@ abstract class Migration
 {
 	private string $fileName;
 
+	private ?int $groupNo;
+
 	private ?DateTimeImmutable $committedAt;
 
 	public function __construct(
 		string $fileName,
+		?int $groupNo,
 		?DateTimeImmutable $committedAt = null
 	) {
 		$this->fileName = $fileName;
+		$this->groupNo = $groupNo;
 		$this->committedAt = $committedAt;
 	}
 
@@ -30,6 +34,11 @@ abstract class Migration
 	public static function isBreakpoint(): bool
 	{
 		return static::down() === null;
+	}
+
+	public function getGroupNo(): ?int
+	{
+		return $this->groupNo;
 	}
 
 	public function isCommitted(): bool

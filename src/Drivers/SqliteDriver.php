@@ -2,14 +2,13 @@
 
 namespace Semisedlak\Migratte\Drivers;
 
-use Dibi\Connection;
 use Dibi\Row;
 use Semisedlak\Migratte\Application\IDriver;
 use Semisedlak\Migratte\Migrations\Table;
 
 class SqliteDriver extends AbstractDriver implements IDriver
 {
-	public function createTable(Connection $connection, Table $table): void
+	public function createTable(Table $table): void
 	{
 		$tableName = $table->getName();
 		$primaryKey = $table->getPrimaryKey();
@@ -25,10 +24,10 @@ CREATE TABLE IF NOT EXISTS "$tableName"
 )
 SQL;
 
-		$connection->nativeQuery($sql);
+		$this->connection->nativeQuery($sql);
 	}
 
-	public function updateTable(Connection $connection, Table $table): void
+	public function updateTable(Table $table): void
 	{
 		$tableName = $table->getName();
 		$newColumns = $this->getNewColumns();
@@ -39,7 +38,7 @@ SQL;
 
 		$columnsQuery = "PRAGMA table_info('$tableName');";
 		/** @var Row[] $existingColumns */
-		$existingColumns = $connection->nativeQuery($columnsQuery)
+		$existingColumns = $this->connection->nativeQuery($columnsQuery)
 			->fetchAll();
 
 		$columnsToAdd = $this->getColumnsToAdd(
@@ -55,12 +54,40 @@ SQL;
 			$sql = <<<SQL
 ALTER TABLE "$tableName" ADD COLUMN "$columnName" $columnType;
 SQL;
-			$connection->nativeQuery($sql);
+			$this->connection->nativeQuery($sql);
 		}
+	}
+
+	public function getMaxGroupNo(Table $table): ?int
+	{
+		$tableName = $table->getName();
+		$groupNo = $table->getGroupNo();
+
+		$sql = <<<SQL
+SELECT MAX(`$groupNo`) AS `max` FROM `$tableName`;
+SQL;
+
+		/** @var int|null $max */
+		$max = $this->connection->nativeQuery($sql)
+			->fetchSingle();
+
+		return $max;
+	}
+
+	public function getNextGroupNo(Table $table): int
+	{
+		$groupNo = $this->getMaxGroupNo($table);
+		if (!$groupNo) {
+			return 1;
+		}
+
+		return $groupNo + 1;
 	}
 
 	public function getNewColumns(): array
 	{
-		return [];
+		return [
+			'group' => 'INT NULL',
+		];
 	}
 }

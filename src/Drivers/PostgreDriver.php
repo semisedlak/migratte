@@ -2,18 +2,17 @@
 
 namespace Semisedlak\Migratte\Drivers;
 
-use Dibi\Connection;
 use Dibi\Row;
 use Semisedlak\Migratte\Application\IDriver;
 use Semisedlak\Migratte\Migrations\Table;
 
 class PostgreDriver extends AbstractDriver implements IDriver
 {
-	public function createTable(Connection $connection, Table $table): void
+	public function createTable(Table $table): void
 	{
 		$tableName = $table->getName();
 		/** @var string $schema */
-		$schema = $connection->getConfig('schema', 'public');
+		$schema = $this->connection->getConfig('schema', 'public');
 		$primaryKey = $table->getPrimaryKey();
 		$fileName = $table->getFileName();
 		$committedAt = $table->getCommittedAt();
@@ -26,14 +25,14 @@ CREATE TABLE IF NOT EXISTS $schema.$tableName (
 );
 SQL;
 
-		$connection->nativeQuery($sql);
+		$this->connection->nativeQuery($sql);
 	}
 
-	public function updateTable(Connection $connection, Table $table): void
+	public function updateTable(Table $table): void
 	{
 		$tableName = $table->getName();
 		/** @var string $schema */
-		$schema = $connection->getConfig('schema', 'public');
+		$schema = $this->connection->getConfig('schema', 'public');
 		$newColumns = $this->getNewColumns();
 
 		if (!$newColumns) {
@@ -42,7 +41,7 @@ SQL;
 
 		$columnsQuery = "SELECT column_name FROM information_schema.columns WHERE table_schema = '$schema' AND table_name = '$tableName';";
 		/** @var Row[] $existingColumns */
-		$existingColumns = $connection->nativeQuery($columnsQuery)->fetchAll();
+		$existingColumns = $this->connection->nativeQuery($columnsQuery)->fetchAll();
 
 		$columnsToAdd = $this->getColumnsToAdd(
 			$newColumns,
@@ -57,12 +56,29 @@ SQL;
 			$sql = <<<SQL
 ALTER TABLE $schema.$tableName ADD COLUMN $columnName $columnType;
 SQL;
-			$connection->nativeQuery($sql);
+			$this->connection->nativeQuery($sql);
 		}
+	}
+
+	public function getMaxGroupNo(Table $table): ?int
+	{
+		return 0; // todo implement
+	}
+
+	public function getNextGroupNo(Table $table): int
+	{
+		$groupNo = $this->getMaxGroupNo($table);
+		if (!$groupNo) {
+			return 1;
+		}
+
+		return $groupNo + 1;
 	}
 
 	public function getNewColumns(): array
 	{
-		return [];
+		return [
+			'group' => 'int NOT NULL',
+		];
 	}
 }
