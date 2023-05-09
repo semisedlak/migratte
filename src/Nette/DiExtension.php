@@ -23,7 +23,7 @@ class DiExtension extends CompilerExtension
 	public function getConfigSchema(): Schema
 	{
 		return Expect::structure([
-			'debug'           => Expect::bool(false),
+			'debug'           => Expect::bool(true),
 			'timezone'        => Expect::string(),
 			'migrationsDir'   => Expect::string(),
 			'migrationsTable' => Expect::structure([
@@ -47,7 +47,7 @@ class DiExtension extends CompilerExtension
 			$this->cliMode = $container->parameters['consoleMode'];
 		}
 
-		if (isset($this->config->debug) && $this->config->debug) {
+		if (!$this->cliMode && $this->debugMode && $this->config->debug) {
 			if (!isset($this->config->connection) || !$this->config->connection) {
 				$extensions = $this->compiler->getExtensions();
 				$dibiExtension = $extensions['dibi'] ?? null;
