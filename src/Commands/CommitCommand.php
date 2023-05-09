@@ -5,9 +5,11 @@ namespace Semisedlak\Migratte\Commands;
 use DateTime;
 use Exception;
 use Semisedlak\Migratte\Migrations\Migration;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class CommitCommand extends Command
 {
@@ -17,6 +19,7 @@ class CommitCommand extends Command
 	private const ARGUMENT_LIMIT = 'limit';
 	private const OPTION_DATETIME_FROM = 'from';
 	private const OPTION_DATETIME_TO = 'to';
+	private const OPTION_EXCLUSIVE = 'exclusive';
 	private const OPTION_DRY_RUN = 'dry-run';
 
 	protected function configure(): void
@@ -43,6 +46,12 @@ class CommitCommand extends Command
 				null
 			)
 			->addOption(
+				self::OPTION_EXCLUSIVE,
+				'x',
+				InputArgument::REQUIRED,
+				'Write migration info into database but do not perform migration SQL'
+			)
+			->addOption(
 				self::OPTION_DRY_RUN,
 				'd',
 				InputArgument::REQUIRED,
@@ -65,10 +74,26 @@ class CommitCommand extends Command
 		$fromDate = $input->getOption(self::OPTION_DATETIME_FROM);
 		/** @var string|null $toDate */
 		$toDate = $input->getOption(self::OPTION_DATETIME_TO);
+		$isExclusive = $input->getOption(self::OPTION_EXCLUSIVE);
 		$isDryRun = $input->getOption(self::OPTION_DRY_RUN);
 
 		if ($isDryRun) {
 			$this->writelnFormatted(' DRY-RUN ', 'black', 'cyan');
+		}
+		if ($isExclusive) {
+			$this->writelnFormatted(' EXCLUSIVE ', 'black', 'magenta');
+
+			/** @var QuestionHelper $helper */
+			$helper = $this->getHelper('question');
+			$question = new ConfirmationQuestion($this->prepareOutput('Are you sure to perform commit in "exclusive" mode? [y/N]: ', 'yellow'), false);
+			/** @var bool|null $name */
+			$confirmed = $helper->ask($this->input, $this->output, $question);
+
+			if (!$confirmed) {
+				$this->writeln("\nAborted. No operation performed.");
+
+				return 0;
+			}
 		}
 
 		if (!is_null($fromDate)) {
@@ -128,17 +153,20 @@ class CommitCommand extends Command
 			$connection->begin();
 			try {
 				if (!$isDryRun) {
-					$tempFile = tempnam(sys_get_temp_dir(), 'migration_');
-					if (!$tempFile) {
-						throw new Exception('Cannot create temporary file');
-					}
-					file_put_contents($tempFile, $migrationClass::up());
+					if (!$isExclusive) {
+						$tempFile = tempnam(sys_get_temp_dir(), 'migration_');
+						if (!$tempFile) {
+							throw new Exception('Cannot create temporary file');
+						}
+						file_put_contents($tempFile, $migrationClass::up());
 
-					$connection->loadFile($tempFile);
+						// This execute migration SQL
+						$connection->loadFile($tempFile);
+
+						@unlink($tempFile);
+					}
 
 					$driver->commitMigration($migrationFile, $group);
-
-					@unlink($tempFile);
 				}
 
 				$connection->commit();
