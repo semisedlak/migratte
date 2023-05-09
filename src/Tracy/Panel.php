@@ -43,11 +43,12 @@ class Panel implements IBarPanel
 
 		$config = new Config($extensionConfig);
 		$this->kernel = new Kernel($config);
+		$driver = $config->getDriver();
 
 		foreach ($this->kernel->getMigrationFilesList() as $migrationFile) {
-			$migrationRow = $config->getDriver()->getMigrationByFileName($migrationFile);
+			$migrationRow = $driver->getMigrationByFileName($migrationFile);
+			$groupNo = $driver->getMigrationGroupNo($migrationRow);
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$groupNo = $this->kernel->getGroupNo($migrationRow);
 			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
 			require_once $this->kernel->getMigrationPath($migrationFile);

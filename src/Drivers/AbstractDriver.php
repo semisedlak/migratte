@@ -38,6 +38,18 @@ class AbstractDriver
 		return $row;
 	}
 
+	public function getMigrationGroupNo(?Row $migrationRow): ?int
+	{
+		if (!$migrationRow) {
+			return null;
+		}
+
+		/** @var int|null $groupNo */
+		$groupNo = $migrationRow[$this->table->getGroupNo()];
+
+		return $groupNo;
+	}
+
 	public function commitMigration(string $fileName, ?int $groupNo = null): void
 	{
 		$this->connection->insert($this->table->getName(), [

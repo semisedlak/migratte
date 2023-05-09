@@ -120,19 +120,4 @@ class Kernel
 
 		return null;
 	}
-
-	public function getGroupNo(?Row $migrationRow): ?int
-	{
-		$table = $this->config->getDriver()->getTable();
-
-		if ($migrationRow) {
-			/** @var int|null $groupNo */
-			$groupNo = $migrationRow[$table->getGroupNo()];
-			if ($groupNo !== null) {
-				return $groupNo;
-			}
-		}
-
-		return null;
-	}
 }

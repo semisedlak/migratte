@@ -40,8 +40,8 @@ class StatusCommand extends Command
 		foreach ($migrationFiles as $migrationFile) {
 			$i++;
 			$migrationRow = $driver->getMigrationByFileName($migrationFile);
+			$groupNo = $driver->getMigrationGroupNo($migrationRow);
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$groupNo = $this->kernel->getGroupNo($migrationRow);
 			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
 			require_once $this->kernel->getMigrationPath($migrationFile);

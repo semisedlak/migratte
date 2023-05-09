@@ -15,6 +15,8 @@ interface IDriver
 
 	public function getMigrationByFileName(string $fileName): ?Row;
 
+	public function getMigrationGroupNo(?Row $migrationRow): ?int;
+
 	public function commitMigration(string $fileName, ?int $groupNo = null): void;
 
 	public function rollbackMigration(int $migrationId): void;
