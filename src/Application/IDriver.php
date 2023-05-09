@@ -2,6 +2,7 @@
 
 namespace Semisedlak\Migratte\Application;
 
+use Dibi\Row;
 use Semisedlak\Migratte\Migrations\Table;
 
 interface IDriver
@@ -11,6 +12,8 @@ interface IDriver
 	public function createTable(): void;
 
 	public function updateTable(): void;
+
+	public function getMigrationByFileName(string $fileName): ?Row;
 
 	public function commitMigration(string $fileName, ?int $groupNo = null): void;
 

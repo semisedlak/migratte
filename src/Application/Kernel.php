@@ -97,20 +97,6 @@ class Kernel
 		return $config->migrationsDir . '/' . $migrationFile;
 	}
 
-	public function getMigration(string $migrationFile): ?Row
-	{
-		$connection = $this->config->getConnection();
-		$table = $this->config->getDriver()->getTable();
-
-		/** @var Row|null $row */
-		$row = $connection->select('*')
-			->from('%n', $table->getName())
-			->where('%n = %s', $table->getFileName(), $migrationFile)
-			->fetch();
-
-		return $row;
-	}
-
 	public function getCommittedAt(?Row $migrationRow): ?DateTimeImmutable
 	{
 		$table = $this->config->getDriver()->getTable();

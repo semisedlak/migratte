@@ -25,6 +25,19 @@ class AbstractDriver
 		return $this->table;
 	}
 
+	public function getMigrationByFileName(string $fileName): ?Row
+	{
+		$table = $this->getTable();
+
+		/** @var Row|null $row */
+		$row = $this->connection->select('*')
+			->from('%n', $table->getName())
+			->where('%n = %s', $table->getFileName(), $fileName)
+			->fetch();
+
+		return $row;
+	}
+
 	public function commitMigration(string $fileName, ?int $groupNo = null): void
 	{
 		$this->connection->insert($this->table->getName(), [

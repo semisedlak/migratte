@@ -59,6 +59,7 @@ class CommitCommand extends Command
 		$driver = $config->getDriver();
 		$table = $driver->getTable();
 
+		/** @var int $migrationsLimit */
 		$migrationsLimit = $input->getArgument(self::ARGUMENT_LIMIT);
 		/** @var string|null $fromDate */
 		$fromDate = $input->getOption(self::OPTION_DATETIME_FROM);
@@ -92,7 +93,7 @@ class CommitCommand extends Command
 			$this->writelnCyan('Limiting to ' . $migrationsLimit . ' migration' . ($migrationsLimit != 1 ? 's' : ''));
 		}
 
-		$group = $driver->getNextGroupNo($table);
+		$group = $driver->getNextGroupNo();
 
 		$migrationFiles = $this->kernel->getMigrationFilesList();
 
@@ -101,7 +102,7 @@ class CommitCommand extends Command
 		foreach ($migrationFiles as $migrationFile) {
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
-			if ($this->kernel->getMigration($migrationFile)) {
+			if ($driver->getMigrationByFileName($migrationFile)) {
 				continue;
 			}
 			$commitPerformed = true;

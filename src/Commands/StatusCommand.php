@@ -27,6 +27,7 @@ class StatusCommand extends Command
 		$showCompact = $input->getOption(self::OPTION_COMPACT);
 
 		$config = $this->kernel->getConfig();
+		$driver = $config->getDriver();
 		$migrationFiles = $this->kernel->getMigrationFilesList();
 
 		$this->write('Migrations dir: ');
@@ -38,8 +39,8 @@ class StatusCommand extends Command
 		$i = 0;
 		foreach ($migrationFiles as $migrationFile) {
 			$i++;
+			$migrationRow = $driver->getMigrationByFileName($migrationFile);
 			$className = $this->kernel->parseMigrationClassName($migrationFile);
-			$migrationRow = $this->kernel->getMigration($migrationFile);
 			$groupNo = $this->kernel->getGroupNo($migrationRow);
 			$committedAt = $this->kernel->getCommittedAt($migrationRow);
 
