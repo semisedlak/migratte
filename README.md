@@ -60,6 +60,7 @@ You can override this default configuration options:
   'name'        => 'migrations',
   'primaryKey'  => 'id',
   'fileName'    => 'filename',
+  'groupNo'     => 'group',
   'committedAt' => 'committed_at',
 ],
 'connection'      => [
@@ -191,12 +192,15 @@ But there is more. You can specify datetime limits `--from` and `--to` for limit
 
 Are you unsure what migrations will be committed? Use `--dry-run` (or `-d`) option to see what migrations will be committed without actually committing them.
 
+Migratte automatically put migrations into groups. These groups are simply integer numbers and they are important for rollback strategy. You can't specify group number. It will be automatically incremented. If you use default rollback strategy (by commit date) it will rollback migrations from the last group (with highest number) in reverse order of committing.
+
 ### `migratte:rollback`
-Command performs rollback operation to already committed migrations back to previous state. Rollback will be done only on (by default) one lastly committed migration. You can specify more migrations to rollback with `limit` (first) argument:
+Command performs rollback operation to already committed migrations back to previous state. Rollback will be done only on (by default) migrations from latest group. You can specify more migrations to rollback with `limit` (first) argument:
 
 ```shell
 $ bin/migrations migratte:rollback 3
 ```
+In this case, it will ignore groups and rollback last 3 committed migrations.
 
 If migration doesn't contain `down()` method or this method simply returns NULL or FALSE it is considered as "breakpoint". Calling rollback on "breakpoint" will throw an error. This can be bypassed by using `--force` (or `-f`) option.
 
@@ -204,7 +208,7 @@ If migration doesn't contain `down()` method or this method simply returns NULL 
 
 You can specify rollback strategy by using `--strategy` option. There are currently three strategies for rollback:
 
-1. by commit **"date"** (this is default) (`--strategy=date`) - rollback by commit date (last committed migration will be rollbacked first)
+1. by commit **"date"** (this is default) (`--strategy=date`) - rollback by commit date (migrations from last group will be rollbacked by commit date in reverse order of committing)
 2. by migration **"order"** (`--strategy=order`) - rollback migrations by migrations order (if you sort files by name, you will get migrations order, so last committed file will be rollbacked first)
 3. by specific **"file"** (`--strategy=file`) - rollback specific migration file. You have to provide migration file name (without path) as `--file` option. Hint: you can omit `.php` extension.
 
