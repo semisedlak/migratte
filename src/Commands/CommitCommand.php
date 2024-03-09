@@ -127,7 +127,9 @@ class CommitCommand extends Command
 		foreach ($migrationFiles as $migrationFile) {
 			require_once $this->kernel->getMigrationPath($migrationFile);
 
-			if ($driver->getMigrationByFileName($migrationFile)) {
+			$migration = $driver->getMigrationByFileName($migrationFile);
+			$committedAt = $driver->getMigrationCommittedAt($migration, $config->getTimeZone());
+			if ($migration && $committedAt) {
 				continue;
 			}
 			$commitPerformed = true;

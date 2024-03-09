@@ -60,6 +60,10 @@ class AbstractDriver
 
 		/** @var \Dibi\DateTime|string $committedAtDate */
 		$committedAtDate = $migrationRow[$this->table->getCommittedAt()];
+		if (!$committedAtDate) {
+			return null;
+		}
+
 		if ($committedAtDate instanceof DateTime) {
 			$dateTime = DateTimeImmutable::createFromFormat(
 				'Y-m-d H:i:s',
@@ -75,11 +79,14 @@ class AbstractDriver
 
 	public function commitMigration(string $fileName, ?int $groupNo = null): void
 	{
-		$this->connection->insert($this->table->getName(), [
-			$this->table->getFileName()    => $fileName,
-			$this->table->getGroupNo()     => $groupNo,
-			$this->table->getCommittedAt() => new DateTime(),
-		])->execute();
+		$this->connection->insert(
+			$this->table->getName(),
+			[
+				$this->table->getFileName()    => $fileName,
+				$this->table->getGroupNo()     => $groupNo,
+				$this->table->getCommittedAt() => new DateTime(),
+			]
+		)->execute();
 	}
 
 	public function rollbackMigration(int $migrationId): void
@@ -123,7 +130,8 @@ class AbstractDriver
 
 	/**
 	 * @param string[] $newColumns
-	 * @param Row[]    $columnsResult
+	 * @param Row[] $columnsResult
+	 *
 	 * @return string[]
 	 */
 	protected function getColumnsToAdd(array $newColumns = [], array $columnsResult = []): array
