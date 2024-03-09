@@ -21,7 +21,7 @@
 	"require": {
 		"php": ">=7.4",
 		"dibi/dibi": "^4",
-		"symfony/console": "^4",
+		"symfony/console": "^4 || ^5",
 		"ext-json": "*"
 	},
 	"require-dev": {
