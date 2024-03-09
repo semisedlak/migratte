@@ -79,14 +79,30 @@ class AbstractDriver
 
 	public function commitMigration(string $fileName, ?int $groupNo = null): void
 	{
-		$this->connection->insert(
-			$this->table->getName(),
-			[
-				$this->table->getFileName()    => $fileName,
-				$this->table->getGroupNo()     => $groupNo,
-				$this->table->getCommittedAt() => new DateTime(),
-			]
-		)->execute();
+		$existingMigration = $this->getMigrationByFileName($fileName);
+		if ($existingMigration) {
+			$this->connection->update(
+				$this->table->getName(),
+				[
+					$this->table->getCommittedAt() => new DateTime(),
+				]
+			)
+				->where(
+					'%n = %i',
+					$this->table->getPrimaryKey(),
+					$existingMigration[$this->table->getPrimaryKey()]
+				)
+				->execute();
+		} else {
+			$this->connection->insert(
+				$this->table->getName(),
+				[
+					$this->table->getFileName()    => $fileName,
+					$this->table->getGroupNo()     => $groupNo,
+					$this->table->getCommittedAt() => new DateTime(),
+				]
+			)->execute();
+		}
 	}
 
 	public function rollbackMigration(int $migrationId): void
