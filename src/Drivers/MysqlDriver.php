@@ -39,6 +39,12 @@ SQL;
 		/** @var Row[] $existingColumns */
 		$existingColumns = $this->connection->nativeQuery($columnsQuery)->fetchAll();
 
+		foreach ($existingColumns as &$column) {
+			if (isset($column['Field'])) {
+				$column['column_name'] = $column['Field'];
+			}
+		}
+
 		$columnsToAdd = $this->getColumnsToAdd(
 			$newColumns,
 			$existingColumns

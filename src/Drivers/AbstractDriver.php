@@ -158,7 +158,7 @@ class AbstractDriver
 
 		$existingColumns = [];
 		foreach ($columnsResult as $column) {
-			$existingColumns[] = $column['name'];
+			$existingColumns[] = $column['column_name'];
 		}
 
 		$columnsToAdd = [];
