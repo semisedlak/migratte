@@ -70,6 +70,8 @@ class AbstractDriver
 				$committedAtDate->setTimezone($timeZone)->format('Y-m-d H:i:s'),
 				$timeZone
 			);
+		} elseif ($committedAtDate instanceof DateTimeImmutable) {
+			$dateTime = $committedAtDate->setTimezone($timeZone);
 		} else {
 			$dateTime = DateTimeImmutable::createFromFormat('U', $committedAtDate, $timeZone);
 		}
