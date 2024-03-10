@@ -92,7 +92,7 @@ When you run `bin/migrations` in CLI you will see "help" overview with possible 
 
 ```
 root@12345:/var/www/html# bin/migrations
-Migratte 0.4.0
+Migratte 0.5.0
 
 Usage:
   command [options] [arguments]
