@@ -34,7 +34,7 @@ SQL;
 			return;
 		}
 
-		$databaseName = $this->connection->getDatabaseInfo()->name;
+		$databaseName = $this->connection->getDatabaseInfo()->getName();
 		$columnsQuery = "SHOW COLUMNS FROM `$tableName` IN `$databaseName`;";
 		/** @var Row[] $existingColumns */
 		$existingColumns = $this->connection->nativeQuery($columnsQuery)->fetchAll();
