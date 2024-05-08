@@ -86,7 +86,7 @@ class CommitCommand extends Command
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 			$question = new ConfirmationQuestion($this->prepareOutput('Are you sure to perform commit in "exclusive" mode? [y/N]: ', 'yellow'), false);
-			/** @var bool|null $name */
+			/** @var bool|null $confirmed */
 			$confirmed = $helper->ask($this->input, $this->output, $question);
 
 			if (!$confirmed) {
