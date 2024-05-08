@@ -114,6 +114,9 @@ class AbstractDriver
 			->execute();
 	}
 
+	/**
+	 * @return Row[]
+	 */
 	public function getRollbackMigrationsList(string $strategy, ?string $fileName = null, ?int $limit = null): array
 	{
 		$table = $this->getTable();
